@@ -57,10 +57,23 @@ theorem Bolzano (f:ℝ → ℝ) (a b:ℝ) (h:a < b):(Continuous_on f (Set.Icc a 
         intro x hx
         exact hx.left.right
     obtain ⟨sup,hsup ⟩ := Real.exists_isLUB  Nonempty_s  BddAboved_s
-
+    have sup_in_ab: sup ∈ Set.Icc a b := by
+        constructor
+        .   have h1:a ≤ sup := by
+                apply hsup.left at hs
+                exact hs
+            exact h1
+        ·   have h2:sup ≤ b := by
+                apply hsup.right
+                unfold upperBounds
+                intro x hx
+                exact hx.left.right
+            exact h2
     have pos:=lt_trichotomy ((f sup)*(f a)) 0
+
     --cases' pos with pos_lt pos1_aux
     rcases pos with (pos_lt | pos_eq | pos_gt)
+
     ·   exfalso
 -- Para extructurarlo: (f x) * (f a) es continua
 --                     si g es  continua y g x < 0, g x es menor que 0 en un entorno de x
@@ -80,18 +93,6 @@ theorem Bolzano (f:ℝ → ℝ) (a b:ℝ) (h:a < b):(Continuous_on f (Set.Icc a 
                 exact (lt_self_iff_false 0).mp extremos
             have abs_fa_pos: |f a| > 0 := by
                 exact abs_pos.mpr fa_ne_zero
-            have sup_in_ab: sup ∈ Set.Icc a b := by
-                constructor
-                .   have h1:a ≤ sup := by
-                        apply hsup.left at hs
-                        exact hs
-                    exact h1
-                ·   have h2:sup ≤ b := by
-                        apply hsup.right
-                        unfold upperBounds
-                        intro x hx
-                        exact hx.left.right
-                    exact h2
 
             have fcontsup := cont_f sup_in_ab
             have eps':ε/|f a| > 0:= by exact div_pos ε_pos abs_fa_pos
@@ -115,7 +116,10 @@ theorem Bolzano (f:ℝ → ℝ) (a b:ℝ) (h:a < b):(Continuous_on f (Set.Icc a 
             exact abs_pos_of_neg pos_lt
         specialize cont_g |f sup * f a| ε1_pos
         have cont_g':= cont_g
+
         obtain ⟨δ,Hδ,hg⟩:=cont_g
+
+
         --ahora toca construir el y para especializer en h. para ello usamos prop.del supremo
         have choosey : ∃ y ∈ s, sup-δ < y:= by
             have sup_is_IsLUB: IsLUB s sup:= by
@@ -148,7 +152,48 @@ theorem Bolzano (f:ℝ → ℝ) (a b:ℝ) (h:a < b):(Continuous_on f (Set.Icc a 
             exact abs_sub_neg_pos_le_abs (f sup * f a)  (f y * f a) pos_lt hy11
 
         linarith
+    ·   use sup
+        constructor
+        ·   exact sup_in_ab
+        ·   have fa_no_zero: f a≠0:= by
+                by_contra ha
+                have fafb_zero: f a* f b=0:=by
+                    rw[mul_eq_zero]
+                    left
+                    exact ha
+                linarith
+            rw[mul_eq_zero] at pos_eq
+            rcases pos_eq with hsup | ha
+            exact hsup
+            exfalso
+            rw[ha] at fa_no_zero
+            trivial
     ·   exfalso
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ·   cases' pos1_aux with pos_eq pos_g
 
 
 
@@ -172,6 +217,19 @@ theorem Bolzano (f:ℝ → ℝ) (a b:ℝ) (h:a < b):(Continuous_on f (Set.Icc a 
 
 -- Probamos que ε' > 0
     cases' pos1_aux with pos_eq pos_gt
+
     · sorry
     · exfalso
       sorry
+example (a b : ℝ) : a = b ∨ a < b ∨ b < a :=by
+  by_cases h1 : a < b
+  · exact Or.inr (Or.inl h1)
+  by_cases h2 : b < a
+  · exact Or.inr (Or.inr h2)
+  -- si ni a < b ni b < a, entonces son iguales
+  have heq : a = b := by
+    suffices : ¬ (a < b) ∧ ¬ (b < a) by
+      cases this
+      exact le_antisymm (le_of_not_gt this.right) (le_of_not_gt this.left)
+    exact ⟨h1, h2⟩
+    exact Or.inl heq
