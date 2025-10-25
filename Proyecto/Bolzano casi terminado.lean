@@ -74,8 +74,9 @@ theorem Bolzano (f:ℝ → ℝ) (a b:ℝ) (h:a < b):(Continuous_on f (Set.Icc a 
     have sup_lt_b: sup < b :=by
         by_cases c: sup =b
         exfalso
-        have hip: f b* f a=0:=by
 
+
+            -----------------------------------
     have fa_ne_zero: f a ≠ 0 := by
         intro contra
         rw[contra] at extremos
@@ -268,7 +269,6 @@ theorem Bolzano (f:ℝ → ℝ) (a b:ℝ) (h:a < b):(Continuous_on f (Set.Icc a 
         have hg':= hg min_in_ab abs_lt_delta
         simp at hg'
         have contra: f (min (sup + δ / 2) ((b - sup) / 2 + sup))* f a>0:= by
-
             by_cases h' : (sup + δ/2) ≤ (b -sup)/2+sup
             have min_eq1: min (sup + δ/2) ((b -sup)/2+sup)=sup + δ/2:=by
                 rw[ min_eq_left]
