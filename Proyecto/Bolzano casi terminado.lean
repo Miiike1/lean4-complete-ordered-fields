@@ -74,7 +74,8 @@ theorem Bolzano (f:ℝ → ℝ) (a b:ℝ) (h:a < b):(Continuous_on f (Set.Icc a 
     have sup_lt_b: sup < b :=by
         by_cases c: sup =b
         exfalso
-
+        sorry
+        sorry
 
             -----------------------------------
     have fa_ne_zero: f a ≠ 0 := by
