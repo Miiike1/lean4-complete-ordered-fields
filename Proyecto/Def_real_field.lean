@@ -9,33 +9,45 @@ variable (X : Type) [RealField X]
 open RealField
 
 --print para ver teoremas, axiomas y props dados por la clase
-theorem supA_lt_x_in_uppbddA {A : Set X} (hA : A.Nonempty)
-(hB : BddAbove A) (a : X) :a ∈ upperBounds A → sSup A ≤ a  := by
+--escribo teoremas útliles para el futuro
+theorem supA_lt_x_in_upbdA {A : Set X} (a : X) (hA : A.Nonempty)
+(hB : BddAbove A):a ∈ upperBounds A → sSup A ≤ a  := by
   intro ha
   have sup_islub:= sSup_axiom A hA hB
   rw[IsLUB,IsLeast, lowerBounds] at sup_islub
   obtain ⟨hsup1,hsup2⟩:=sup_islub
   simp at hsup2
-  have hsup3:= hsup2 ha
-  exact hsup3
+  have hsup3:= hsup2
+  exact hsup3 ha
+
+
 
 
 theorem supA_lt_a_in_A {A : Set X} (hA : A.Nonempty)
- (hB : BddAbove A) (a : X) :a ∈  A → a ≤ sSup A := by
+ (hB : BddAbove A) (a : X) :a ∈ A → a ≤ sSup A := by
   intro ha
   obtain ⟨sup_up,sup_low⟩:= sSup_axiom A hA hB
   exact sup_up ha
 
 theorem x_lt_supA_a_lt_sup {A : Set X} (hA : A.Nonempty)
- (hB : BddAbove A) (x:X): x ≤ sSup A → ∃ a ∈ A, x≤a ∧ a ≤ sup
+ (hB : BddAbove A) (b : X): b ≤ sSup A → ∃ a ∈ A, b ≤ a := by
+
   intro hx
+  by_contra hc
+  push_neg at hc
+  have x_is_upper_bound: b ∈ upperBounds A
+  · have hc' : ∀ x₁ ∈ A, x₁ ≤ b
+    · intro x₁ hx₁
+      exact le_of_lt (hc x₁ hx₁)
+    exact hc'
+  sorry
 
+--he tenido problemas a la hora de cerrar este teorema, no me deja aplicar el teorema
+-- supA_lt_a_in_A
+--al poner tanto "have sup_lt_x:= supA_lt_a_in_A x hA hB x_in:upper_bound
+--como distintas variaciones (probando a introducir A, quitar x etc) me da error.
+--no sé cómo solucionarlo (estoy creando estos teoremas porque creo que vendrán bien)
 
-
-
-
-
-  rw[IsLUB,IsLeast, lowerBounds]
 instance : Archimedean X where
   arch := by
     intro x y hy1
