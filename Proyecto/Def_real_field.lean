@@ -3,7 +3,7 @@ import Mathlib
 class RealField (R : Type) extends SupSet R, Field R, LinearOrder R, IsStrictOrderedRing R where
   sSup_axiom :  ∀ (S: Set R), S.Nonempty → BddAbove S → IsLUB S (sSup S)
 variable {X : Type} [RealField X]
-
+variable {Y : Type} [RealField Y]
 #print RealField
 
 open RealField
@@ -81,12 +81,10 @@ instance : Archimedean X where
       rw[<-sup_eq_sup] at sup_islub
       have sup_sub_y_lt_x: sup - y < sup
       · rw[sub_lt_self_iff]; exact hy1
-      have alph_in_A_gt_sup_sub_y: ∃α ∈ A, sup - y < α
-      · exact  x_lt_supA_a_lt_sup Anonempty Abddabv (sup-y) sup_sub_y_lt_x
-      obtain ⟨α,hα1,hα2⟩:=alph_in_A_gt_sup_sub_y
+      obtain ⟨α, hα1, hα2⟩ := x_lt_supA_a_lt_sup Anonempty Abddabv (sup-y) sup_sub_y_lt_x
       have alpha_eq_n0_y : ∃(n₀ : ℕ), α = n₀ • y
       · exact hα1
-      obtain ⟨n₀,hn₀⟩:=alpha_eq_n0_y
+      obtain ⟨n₀ , hn₀⟩:=alpha_eq_n0_y
       have sup_lt: sup < (n₀ + 1) • y
       · rw[hn₀] at hα2
         rw[sub_lt_iff_lt_add] at hα2
@@ -98,12 +96,45 @@ instance : Archimedean X where
       specialize n0_add_one_lt_sup ((n₀ + 1) • y) n0_add_1_in_A
       linarith
 
+  --quedó más larga de lo que querría, pero bueno, de momento...
 
-      --quedó más larga de lo que querría, pero bueno, de momento la dejo así
+theorem Q_is_dense (x y : X) (h : x < y) :
+  ∃ p : ℚ, x < p ∧ p < y := by
+  exact exists_rat_btwn h
+
+  -- este lo llamo distinto para aclararme, pero vamos, es tontería
+
+theorem natCast_injective : Function.Injective (fun n : ℕ => (n : X)) :=
+  Nat.cast_injective
+theorem ratCast_injective : Function.Injective (fun q: ℚ => (q : X)) :=
+  Rat.cast_injective
+  --es decir, en X están incluidos los racionales, idem para Y
+
+def Nₓ : Set X := {x : X | ∃ n : ℕ, x = n}
+def Qₓ : Set X := {x : X | ∃ q : ℚ, x = q}
+
+theorem natCast_A_Y_injective :
+  Function.Injective (fun (n : Nₓ) => (n.val : Y)) := by
+
+  intro ⟨x, hx⟩ ⟨y, hy⟩ h
+  -- h : (x : Y) = (y : Y)
+  -- los naturales se inyectan en Y:
+  simp at *
+  exact h
 
 
 
 
+
+
+
+theorem Uniqueness_Real_Numbers :
+  ∃ f : X → Y,
+    Function.Bijective f ∧
+    (∀ x y, f (x + y) = f x + f y) ∧
+    (∀ x y, f (x * y) = f x * f y) ∧
+    (∀ x y, x < y → f x < f y) := by
+    sorry
 
 
 
