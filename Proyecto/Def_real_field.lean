@@ -46,8 +46,6 @@ theorem x_lt_supA_a_lt_sup {A : Set X} (hA : A.Nonempty)
   linarith
 
 
-
-
 instance : Archimedean X where
   arch := by
     intro x y hy1
@@ -101,7 +99,8 @@ instance : Archimedean X where
 theorem Q_is_dense (R : Type) [RealField R] (x y : R) (h : x < y) :
   ∃ p : ℚ, x < p ∧ p < y := by
   exact exists_rat_btwn h
---pendiente a demostrar
+--pendiente a demostrar por mi
+
 
 
 
@@ -112,22 +111,36 @@ theorem Q_is_dense (R : Type) [RealField R] (x y : R) (h : x < y) :
 
 
 --conjunto de elementos en R (probar que es no vacío y acotado)
-
-  ∃ p : ℚ, x < p ∧ p < y := by
-
 def Sℚ (R : Type) [RealField R] : R → (Set ℚ) := fun x => {(q:ℚ ) | (q:R) < x}
 
-def SR (R : Type) [RealField R] : R → (Set X ) := fun x => { (q : X) | q ∈ Sℚ R x}
+def SR (R : Type) [RealField R] : R → (Set X) := fun x => {(q : X) | q ∈ Sℚ R x}
 
 theorem forall_x_SℚRx_nonempty (R : Type) [RealField R] (x : R) : (Sℚ R x).Nonempty:= by
 
-  have aux : x - 1 < x := by  linarith
+  have aux : x - 1 < x := by linarith
   have hp := Q_is_dense R (x-1) x aux
   obtain ⟨p,hp1,hp2⟩ := hp
   use p
   exact hp2
 
 theorem forall_x_SℚRx_bddabv (R : Type) [RealField R] (x : R) : BddAbove (Sℚ R x) := by
+  rw[BddAbove, upperBounds]
+  have aux : x < x + 1 := by linarith
+  have hp := Q_is_dense R x (x+1)  aux
+  obtain ⟨p,hp1,hp2⟩ := hp
+  use p
+  intro a
+  rw [Sℚ]
+  intro h
+  have aux:= lt_trans h hp1
+  apply le_of_lt at aux
+  exact Rat.cast_le.mp aux
+
+--def Sℚ (R : Type) [RealField R] : R → (Set ℚ) := fun x => {(q:ℚ ) | (q:R) < x}
+
+--def SR (R : Type) [RealField R] : R → (Set X ) := fun x => { (q : X) | q ∈ Sℚ R x}
+
+--definir ahora una aplicación desde los conjuntos de la forma (Sℚ R1 x) a R2 (Ri RealField)
 
 
 
@@ -136,19 +149,21 @@ theorem forall_x_SℚRx_bddabv (R : Type) [RealField R] (x : R) : BddAbove (Sℚ
 
 
 
-def q_lt_x_ℚ (x : X) : Set ℚ := Sℚ X x
-
-
---conjunto de elementos en Q (probar que es no vacío y acotado)
-
-def q_lt_x_R (R : Type) [RealField R] (x : R) : Set R :=
-  {(q : R) | q ∈ q_lt_x_ℚ R x}
-
-
---definir aolicación de puntos en x a
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+--teorema a demostrar
 theorem Uniqueness_Real_Numbers (X Y : Type) [RealField X] [RealField Y] :
   ∃ f : X → Y,
     Function.Bijective f ∧
