@@ -98,29 +98,10 @@ instance : Archimedean X where
 
   --quedó más larga de lo que querría, pero bueno, de momento...
 
-theorem Q_is_dense (x y : X) (h : x < y) :
+theorem Q_is_dense (R : Type) [RealField R] (x y : R) (h : x < y) :
   ∃ p : ℚ, x < p ∧ p < y := by
   exact exists_rat_btwn h
-
-  -- este lo llamo distinto para aclararme, pero vamos, es tontería
-
-theorem natCast_injective : Function.Injective (fun n : ℕ => (n : X)) :=
-  Nat.cast_injective
-theorem ratCast_injective : Function.Injective (fun q: ℚ => (q : X)) :=
-  Rat.cast_injective
-  --es decir, en X están incluidos los racionales, idem para Y
-
-def Nₓ : Set X := {x : X | ∃ n : ℕ, x = n}
-def Qₓ : Set X := {x : X | ∃ q : ℚ, x = q}
-
-theorem natCast_A_Y_injective :
-  Function.Injective (fun (n : Nₓ) => (n.val : Y)) := by
-
-  intro ⟨x, hx⟩ ⟨y, hy⟩ h
-  -- h : (x : Y) = (y : Y)
-  -- los naturales se inyectan en Y:
-  simp at *
-  exact h
+--pendiente a demostrar
 
 
 
@@ -128,19 +109,53 @@ theorem natCast_A_Y_injective :
 
 
 
-theorem Uniqueness_Real_Numbers :
+
+
+--conjunto de elementos en R (probar que es no vacío y acotado)
+
+  ∃ p : ℚ, x < p ∧ p < y := by
+
+def Sℚ (R : Type) [RealField R] : R → (Set ℚ) := fun x => {(q:ℚ ) | (q:R) < x}
+
+def SR (R : Type) [RealField R] : R → (Set X ) := fun x => { (q : X) | q ∈ Sℚ R x}
+
+theorem forall_x_SℚRx_nonempty (R : Type) [RealField R] (x : R) : (Sℚ R x).Nonempty:= by
+
+  have aux : x - 1 < x := by  linarith
+  have hp := Q_is_dense R (x-1) x aux
+  obtain ⟨p,hp1,hp2⟩ := hp
+  use p
+  exact hp2
+
+theorem forall_x_SℚRx_bddabv (R : Type) [RealField R] (x : R) : BddAbove (Sℚ R x) := by
+
+
+
+
+
+
+
+
+def q_lt_x_ℚ (x : X) : Set ℚ := Sℚ X x
+
+
+--conjunto de elementos en Q (probar que es no vacío y acotado)
+
+def q_lt_x_R (R : Type) [RealField R] (x : R) : Set R :=
+  {(q : R) | q ∈ q_lt_x_ℚ R x}
+
+
+--definir aolicación de puntos en x a
+
+
+
+theorem Uniqueness_Real_Numbers (X Y : Type) [RealField X] [RealField Y] :
   ∃ f : X → Y,
     Function.Bijective f ∧
     (∀ x y, f (x + y) = f x + f y) ∧
     (∀ x y, f (x * y) = f x * f y) ∧
     (∀ x y, x < y → f x < f y) := by
-    sorry
-
-
-
-
-
-
+   sorry
 
 
 
