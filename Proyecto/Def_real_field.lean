@@ -108,9 +108,9 @@ theorem Q_is_dense (R : Type) [RealField R] (x y : R) (h : x < y) :
 --conjunto de elementos en R (probar que es no vacío y acotado)
 def Sℚ (R : Type) [RealField R] : R → (Set ℚ) := fun x => {(q:ℚ ) | (q:R) < x}
 
-def SR (R : Type) [RealField R] : R → (Set X) := fun x => {(q : X) | q ∈ Sℚ R x}
+def SR (R : Type) [RealField R] : R → (Set R) := fun x => {(q : R) | q ∈ Sℚ R x}
 
-theorem forall_x_SℚRx_nonempty (R : Type) [RealField R] (x : R) : (Sℚ R x).Nonempty:= by
+lemma forall_x_SℚRx_nonempty (R : Type) [RealField R] (x : R) : (Sℚ R x).Nonempty:= by
 
   have aux : x - 1 < x := by linarith
   have hp := Q_is_dense R (x-1) x aux
@@ -131,6 +131,35 @@ theorem forall_x_SℚRx_bddabv (R : Type) [RealField R] (x : R) : BddAbove (Sℚ
   apply le_of_lt at aux
   exact Rat.cast_le.mp aux
 
+
+--se puede modificar esto y aplicar que Sℚ R x es no vacío, sacando un testigo etc
+
+theorem forall_x_SRRx_nonempty (R : Type) [RealField R] (x : R) : (SR R x).Nonempty:= by
+
+  have aux : x - 1 < x := by linarith
+  have hp := Q_is_dense R (x-1) x aux
+  obtain ⟨p,hp1,hp2⟩ := hp
+  use p
+  rw[SR]
+  simp
+  exact hp2
+
+
+theorem forall_x_SRRx_bddabv (R : Type) [RealField R] (x : R) : BddAbove (SR R x) := by
+  rw[BddAbove, upperBounds]
+  have aux : x < x + 1 := by linarith
+  have hp := Q_is_dense R x (x+1)  aux
+  obtain ⟨p,hp1,hp2⟩ := hp
+  use p
+  intro a
+  rw [SR]
+  intro h
+  simp at h
+  obtain ⟨q,hq,ha⟩:= h
+  rw[Sℚ] at hq; simp at hq
+  linarith
+
+
 --def Sℚ (R : Type) [RealField R] : R → (Set ℚ) := fun x => {(q:ℚ ) | (q:R) < x}
 
 --def SR (R : Type) [RealField R] : R → (Set X ) := fun x => { (q : X) | q ∈ Sℚ R x}
@@ -142,10 +171,10 @@ theorem forall_x_SℚRx_bddabv (R : Type) [RealField R] (x : R) : BddAbove (Sℚ
 def Supx (R : Type) [RealField R] : R → R := fun x => sSup (SR R x)
 
 
-theorem Supx_is_idd  (R : Type) [RealField R] :  Supx R = id := by
+theorem Supx_is_idd (R : Type) [RealField R] :  Supx R = id := by
   funext x
-  rw[id,Supx,SR,Sℚ]
-  have supxislub : IsLUB (SR R x) x := by
+  rw[id,Supx]
+  have xislub : IsLUB (SR R x) x := by
     constructor
     · intro a ha
       rw[SR, Sℚ] at ha
@@ -154,21 +183,80 @@ theorem Supx_is_idd  (R : Type) [RealField R] :  Supx R = id := by
       rw[ha] at hq
       exact le_of_lt hq
 
-    intro y hy
-    rw[upperBounds,SR,Sℚ] at hy
-    simp at hy
+    · intro y hy
+      rw[upperBounds,SR,Sℚ] at hy
+      simp at hy
+      by_contra hc
+      push_neg at hc
+      obtain ⟨p,hp1,hp2⟩ := Q_is_dense R y x hc
+      have hy2 := hy p hp2
+      linarith
+  have nonempty:= forall_x_SRRx_nonempty R x
+  have bddabv  := forall_x_SRRx_bddabv R x
+  have IsLUBsup:= sSup_axiom (SR R x) nonempty bddabv
+  exact IsLUBsup.unique xislub
+
+--función definida, la que da el isomorfismo (a comprobar)
+--cambiar algún nombre
+def SRZ (R Z : Type) [RealField R] [RealField Z] :
+  R → Z := fun x => sSup {(q : Z) | q ∈ Sℚ R x}
+
+theorem SZR_is_SRZ_inv (R Z : Type) [RealField R] [RealField Z] : (SRZ Z R) ∘ (SRZ R Z) = id := by
+  funext x
+  rw[id]
+  have fx:= SRZ R Z x
+  have compo: (SRZ Z R ∘ SRZ R Z) x= SRZ Z R (SRZ R Z x):=rfl
+  rw[compo]
+  rw[SRZ,SRZ]
 
 
+theorem Sℚ_inj (R) [RealField R] : Function.Injective (Sℚ R):= by
+  intro x y h
+  by_contra hc
+  rw[Sℚ , Sℚ] at h
+  simp at h
+  push_neg at hc
+  by_cases hc1: x < y
+  · obtain ⟨q, hqx, hqy⟩ := Q_is_dense R x y hc1
+    have hqinSQY: q ∈ Sℚ R y := by
+      exact hqy
+    have hqnoinSQX: q ∉ Sℚ R x:= by
+      rw[Sℚ]
+      simp
+      linarith
+    have diff_sets:  Sℚ R x ≠ Sℚ R y := by
+      rw[Sℚ, Sℚ]
+      simp
+      rw[Set.ext_iff]
+      push_neg
+      use q
+      right
+      constructor
+      · exact hqnoinSQX
+      · exact hqinSQY
+    trivial
+  · push_neg at hc1
+    symm at hc
+    have hc1:= lt_of_le_of_ne hc1 hc
+    obtain ⟨q, hqy, hqx⟩ := Q_is_dense R y x hc1
+    have hqinSQX: q ∈ Sℚ R x := by
+      exact hqx
+    have hqnoinSQY: q ∉ Sℚ R y:= by
+      rw[Sℚ]
+      simp
+      linarith
+    have diff_sets:  Sℚ R x ≠ Sℚ R y := by
+      rw[Sℚ, Sℚ]
+      simp
+      rw[Set.ext_iff]
+      push_neg
+      use q
+      left
+      constructor
+      · exact hqinSQX
+      · exact hqnoinSQY
+    trivial
 
-
-
-
-
-
-
-
-
-def SR (R : Type) [RealField R] : R → (Set X) := fun x => {(q : X) | q ∈ Sℚ R x}
 
 
 
@@ -180,8 +268,8 @@ theorem Uniqueness_Real_Numbers (X Y : Type) [RealField X] [RealField Y] :
     (∀ x y, f (x + y) = f x + f y) ∧
     (∀ x y, f (x * y) = f x * f y) ∧
     (∀ x y, x < y → f x < f y) := by
-   sorry
 
+  sorry
 
 
 
