@@ -105,11 +105,6 @@ theorem Q_is_dense (R : Type) [RealField R] (x y : R) (h : x < y) :
 
 
 
-
-
-
-
-
 --conjunto de elementos en R (probar que es no vacío y acotado)
 def Sℚ (R : Type) [RealField R] : R → (Set ℚ) := fun x => {(q:ℚ ) | (q:R) < x}
 
@@ -144,6 +139,24 @@ theorem forall_x_SℚRx_bddabv (R : Type) [RealField R] (x : R) : BddAbove (Sℚ
 
 
 
+def Supx (R : Type) [RealField R] : R → R := fun x => sSup (SR R x)
+
+
+theorem Supx_is_idd  (R : Type) [RealField R] :  Supx R = id := by
+  funext x
+  rw[id,Supx,SR,Sℚ]
+  have supxislub : IsLUB (SR R x) x := by
+    constructor
+    · intro a ha
+      rw[SR, Sℚ] at ha
+      simp at ha
+      obtain ⟨q,hq,ha⟩:=ha
+      rw[ha] at hq
+      exact le_of_lt hq
+
+    intro y hy
+    rw[upperBounds,SR,Sℚ] at hy
+    simp at hy
 
 
 
@@ -155,10 +168,7 @@ theorem forall_x_SℚRx_bddabv (R : Type) [RealField R] (x : R) : BddAbove (Sℚ
 
 
 
-
-
-
-
+def SR (R : Type) [RealField R] : R → (Set X) := fun x => {(q : X) | q ∈ Sℚ R x}
 
 
 
