@@ -247,51 +247,76 @@ lemma SR_injective (R : Type) [RealField R] : Function.Injective (SR R) := by
   by_contra hc
   push_neg at hc
   by_cases hc1: x < y
+  sorry
+  sorry
+
 
 
 def SRZ (R Z : Type) [RealField R] [RealField Z] :
   R → Z := fun x => sSup {(q : Z) | q ∈ Sℚ R x}
 
+
 --clave: los números racionales más pequeños que un x dado coinciden
 --con los de su imagen por la aplicación SRZ
+
 #print Sℚ X
+
+theorem rat_btw_p_lt_x_lt_q (R : Type) [RealField R] (x : R) (p q : ℚ) :
+  ↑ p < x → x < ↑ q → p < q := by
+  intro hp hq
+  have  p_lt_q: (↑p:R) < (↑q:R) := by
+    linarith
+  norm_cast at p_lt_q
+
+
 
 
 theorem SℚRx_eq_SℚZSRZRZx (R Z : Type) [RealField R] [RealField Z] (x : R): Sℚ R x = Sℚ Z (SRZ R Z x):= by
   rw[Sℚ,Sℚ]
   rw[Set.ext_iff]
   intro q
-
   constructor
   · intro hq
-    simp at *
     rw[SRZ,Sℚ]
-    simp
-    have x_eq_supp: sSup {x_1 | ∃ q ∈ Sℚ R x, ↑q = x_1} = x
-    · have idd:= Supx_is_idd R
-      apply congrFun idd x
-    rw[Sℚ] at x_eq_supp
--- problema al hacer rw (debería poder pero no entiende que es la misma estructura)
-    simp at x_eq_supp
-   -- problema al hacer rw (debería poder pero no entiende que es la misma estructura)
-    rw[x_eq_supp]
+    push_neg at hq
+    have q_lt_sup : (↑ q:Z) < sSup { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}
+    · have q_in_set: (↑ q:Z) ∈ { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}
+      · simp
+        exact hq
+      have sSup_isuppbdd: IsLUB { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y} (sSup { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y})
+      · have set_nonempt: { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}.Nonempty
+        · exact Set.nonempty_of_mem q_in_set
+      · have set_bdd    : BddAbove  { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}
+        · have x_lt_x_1: x<x+1 := by linarith
+          have p_uppbdd: ∃ p : ℚ, x < p ∧ p < x+1  := by exact Q_is_dense R x (x+1) x_lt_x_1
+          obtain ⟨p,hp1, hp2⟩:= p_uppbdd
+          use p
+          intro a ha
+          simp at ha
+          obtain ⟨k, ha1,ha2⟩:= ha
+          rw[<-ha2]
+          norm_cast
+          have coer_inR: (↑k : R) ≤ (↑ p:R):= by
+            have pleq:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 #print SR
-
-
-
-
-
-
-def Supx (R : Type) [RealField R] : R → R := fun x => sSup (SR R x)
-
-
-
-
-
-
 
 
 theorem SZR_is_SRZ_inv (R Z : Type) [RealField R] [RealField Z] : (SRZ Z R) ∘ (SRZ R Z) = id := by
