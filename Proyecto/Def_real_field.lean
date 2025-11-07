@@ -106,7 +106,7 @@ theorem Q_is_dense (R : Type) [RealField R] (x y : R) (h : x < y) :
 
 
 --conjunto de elementos en R (probar que es no vacío y acotado)
-def Sℚ (R : Type) [RealField R] : R → (Set ℚ) := fun x => {(q:ℚ ) | (q:R) < x}
+def Sℚ (R : Type) [RealField R] : R → (Set ℚ) := fun x => {(q:ℚ ) | ↑ q < x}
 
 def SR (R : Type) [RealField R] : R → (Set R) := fun x => {(q : R) | q ∈ Sℚ R x}
 
@@ -161,12 +161,7 @@ theorem forall_x_SRRx_bddabv (R : Type) [RealField R] (x : R) : BddAbove (SR R x
 
 
 --def Sℚ (R : Type) [RealField R] : R → (Set ℚ) := fun x => {(q:ℚ ) | (q:R) < x}
-
 --def SR (R : Type) [RealField R] : R → (Set X ) := fun x => { (q : X) | q ∈ Sℚ R x}
-
---definir ahora una aplicación desde los conjuntos de la forma (Sℚ R1 x) a R2 (Ri RealField)
-
-
 
 def Supx (R : Type) [RealField R] : R → R := fun x => sSup (SR R x)
 
@@ -198,19 +193,8 @@ theorem Supx_is_idd (R : Type) [RealField R] :  Supx R = id := by
 
 --función definida, la que da el isomorfismo (a comprobar)
 --cambiar algún nombre
-def SRZ (R Z : Type) [RealField R] [RealField Z] :
-  R → Z := fun x => sSup {(q : Z) | q ∈ Sℚ R x}
 
-theorem SZR_is_SRZ_inv (R Z : Type) [RealField R] [RealField Z] : (SRZ Z R) ∘ (SRZ R Z) = id := by
-  funext x
-  rw[id]
-  have fx:= SRZ R Z x
-  have compo: (SRZ Z R ∘ SRZ R Z) x= SRZ Z R (SRZ R Z x):=rfl
-  rw[compo]
-  rw[SRZ,SRZ]
-
-
-theorem Sℚ_inj (R) [RealField R] : Function.Injective (Sℚ R):= by
+lemma Sℚ_inj (R) [RealField R] : Function.Injective (Sℚ R):= by
   intro x y h
   by_contra hc
   rw[Sℚ , Sℚ] at h
@@ -257,9 +241,67 @@ theorem Sℚ_inj (R) [RealField R] : Function.Injective (Sℚ R):= by
       · exact hqnoinSQY
     trivial
 
+lemma SR_injective (R : Type) [RealField R] : Function.Injective (SR R) := by
+  intro x y hxy
+  rw[SR, SR] at hxy
+  by_contra hc
+  push_neg at hc
+  by_cases hc1: x < y
+
+
+def SRZ (R Z : Type) [RealField R] [RealField Z] :
+  R → Z := fun x => sSup {(q : Z) | q ∈ Sℚ R x}
+
+--clave: los números racionales más pequeños que un x dado coinciden
+--con los de su imagen por la aplicación SRZ
+#print Sℚ X
+
+
+theorem SℚRx_eq_SℚZSRZRZx (R Z : Type) [RealField R] [RealField Z] (x : R): Sℚ R x = Sℚ Z (SRZ R Z x):= by
+  rw[Sℚ,Sℚ]
+  rw[Set.ext_iff]
+  intro q
+
+  constructor
+  · intro hq
+    simp at *
+    rw[SRZ,Sℚ]
+    simp
+    have x_eq_supp: sSup {x_1 | ∃ q ∈ Sℚ R x, ↑q = x_1} = x
+    · have idd:= Supx_is_idd R
+      apply congrFun idd x
+    rw[Sℚ] at x_eq_supp
+-- problema al hacer rw (debería poder pero no entiende que es la misma estructura)
+    simp at x_eq_supp
+   -- problema al hacer rw (debería poder pero no entiende que es la misma estructura)
+    rw[x_eq_supp]
 
 
 
+#print SR
+
+
+
+
+
+
+def Supx (R : Type) [RealField R] : R → R := fun x => sSup (SR R x)
+
+
+
+
+
+
+
+
+theorem SZR_is_SRZ_inv (R Z : Type) [RealField R] [RealField Z] : (SRZ Z R) ∘ (SRZ R Z) = id := by
+  funext x
+  rw[id]
+  have fx:= SRZ R Z x
+  have compo: (SRZ Z R ∘ SRZ R Z) x= SRZ Z R (SRZ R Z x):=rfl
+  rw[compo]
+  rw[SRZ,SRZ]
+  sorry
 
 --teorema a demostrar
 theorem Uniqueness_Real_Numbers (X Y : Type) [RealField X] [RealField Y] :
