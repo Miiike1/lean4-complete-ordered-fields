@@ -409,6 +409,7 @@ theorem SℚRx_eq_SℚZSRZRZx (R Z : Type) [RealField R] [RealField Z] (x : R) :
       linarith
 
 
+
 theorem SZR_is_SRZ_inv (R Z : Type) [RealField R] [RealField Z] : (SRZ Z R) ∘ (SRZ R Z) = id := by
 
   funext x
@@ -418,6 +419,25 @@ theorem SZR_is_SRZ_inv (R Z : Type) [RealField R] [RealField Z] : (SRZ Z R) ∘ 
   rw[compo]
   rw[SRZ]
   rw[<-this,Sℚ]
+  by_contra hc
+  push_neg at hc
+  apply lt_or_gt_of_ne at hc
+  cases' hc with hlt hgt
+  obtain ⟨p, hp1, hp2⟩ := Q_is_dense R (sSup {y : R | ∃ q  ∈ {q:ℚ | ↑q < (x : R)}, (↑q : R) = y}) x hlt
+  have pinset1 : p ∈ {q : ℚ| ↑q < x}:= hp2
+  have copinset: ↑p ∈ {y : R | ∃ q  ∈ {q:ℚ | ↑q < (x : R)}, (↑q : R) = y} := by simp; exact hp2
+  have set_eq_set: {y : R | ∃ q  ∈ {q:ℚ | ↑q < (x : R)}, (↑q : R) = y}={y : R | ∃ (q : ℚ) , ↑q < (x : R) ∧ (↑q : R) = y} := by rfl
+  rw[set_eq_set] at *
+  have nonempt2 := rats_lt_sup_rats_nonempt R R x
+  have bddabv2  := rats_lt_sup_rats_bddabv R R x
+
+  have sup_IsLUB:= sSup_axiom {y : R | ∃ (q : ℚ) , ↑q < (x : R) ∧ (↑q : R) = y} nonempt2 bddabv2
+
+
+
+
+
+
 
 
   sorry
