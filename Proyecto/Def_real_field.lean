@@ -259,8 +259,6 @@ def SRZ (R Z : Type) [RealField R] [RealField Z] :
 --clave: los números racionales más pequeños que un x dado coinciden
 --con los de su imagen por la aplicación SRZ
 
-#print Sℚ X
-
 theorem rat_btw_p_lt_x_lt_q (R : Type) [RealField R] (x : R) (p q : ℚ) :
   ↑ p < x → x < ↑ q → p < q := by
   intro hp hq
@@ -268,36 +266,90 @@ theorem rat_btw_p_lt_x_lt_q (R : Type) [RealField R] (x : R) (p q : ℚ) :
     linarith
   norm_cast at p_lt_q
 
+theorem rat_lt_x_lt_rat (R : Type) [RealField R] (x : R) (p q : ℚ) :
+   ↑ q < x → x < ↑ p → (q : ℚ) < (p : ℚ):= by
+  intro hq hp
+  have := lt_trans hq hp
+  norm_cast at this
 
+
+theorem rat_btw_xinR_yinZ (R Z : Type) [RealField R] [RealField Z] (x : R) (y : Z) (p : ℚ) :
+  ↑ p < x →  y = ↑ p → ∃(q : ℚ), ↑q < x ∧ y < ↑ q := by
+  intro hx hy
+  have hq:= Q_is_dense R p x hx
+  obtain ⟨q, hq1, hq2⟩:= hq
+  use q
+  constructor
+  · exact hq2
+  · rw[hy]
+    norm_cast at *
+
+theorem x_lt_x_add_one (R : Type) [RealField R] (x : R) : x < x + 1 := by linarith
 
 
 theorem SℚRx_eq_SℚZSRZRZx (R Z : Type) [RealField R] [RealField Z] (x : R): Sℚ R x = Sℚ Z (SRZ R Z x):= by
   rw[Sℚ,Sℚ]
   rw[Set.ext_iff]
+  let sup := sSup { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}
+  have sup_eq_sup: sup = sSup { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}
+  · rfl
   intro q
   constructor
   · intro hq
     rw[SRZ,Sℚ]
     push_neg at hq
-    have q_lt_sup : (↑ q:Z) < sSup { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}
-    · have q_in_set: (↑ q:Z) ∈ { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}
-      · simp
-        exact hq
-      have sSup_isuppbdd: IsLUB { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y} (sSup { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y})
-      · have set_nonempt: { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}.Nonempty
-        · exact Set.nonempty_of_mem q_in_set
-      · have set_bdd    : BddAbove  { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}
-        · have x_lt_x_1: x<x+1 := by linarith
-          have p_uppbdd: ∃ p : ℚ, x < p ∧ p < x+1  := by exact Q_is_dense R x (x+1) x_lt_x_1
-          obtain ⟨p,hp1, hp2⟩:= p_uppbdd
-          use p
-          intro a ha
-          simp at ha
-          obtain ⟨k, ha1,ha2⟩:= ha
-          rw[<-ha2]
-          norm_cast
-          have coer_inR: (↑k : R) ≤ (↑ p:R):= by
-            have pleq:
+
+    have q_in_set: (↑ q:Z) ∈ { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}
+    · simp
+      exact hq
+
+    have sSup_IsLUB: (IsLUB { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y} (sSup { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}))
+    · have set_nonempt: { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}.Nonempty:= by exact Set.nonempty_of_mem q_in_set
+
+      have set_bdd    : BddAbove { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}
+      · obtain ⟨p,hp1,hp2⟩  := Q_is_dense R x (x+1) (x_lt_x_add_one R x)
+        use ↑ p
+        intro a ha; simp at ha
+        obtain ⟨q,hq1,hq2⟩:= ha
+        rw[<-hq2]
+        norm_cast
+        have := rat_lt_x_lt_rat R x p q hq1 hp1
+        linarith
+
+      exact sSup_axiom  { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y} set_nonempt set_bdd
+
+    have q_lt_sup : (↑ q:Z) < sup := by
+      rw[sup_eq_sup]
+      simp at hq
+      apply sSup_IsLUB.1 at q_in_set
+
+      have coq_nesup: ↑q ≠ sup
+      · by_contra hc ; symm at hc
+        obtain ⟨p,hp1,hp2⟩:= rat_btw_xinR_yinZ R Z x sup q hq hc
+        have p_in_set : (↑ p:Z) ∈ { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y} := by simp; exact hp1
+        have contra: ↑ p ≤ sup
+
+        · rw[sup_eq_sup]
+          exact sSup_IsLUB.1 p_in_set
+        linarith
+
+      apply lt_or_gt_of_ne at coq_nesup
+      cases coq_nesup
+      · linarith
+      · linarith
+
+    rw[sup_eq_sup] at q_lt_sup
+    exact q_lt_sup
+
+  · intro hq; simp at hq
+    rw[SRZ, Sℚ] at hq
+    have nonempt : {x_1 | ∃ q ∈ {q | ↑q < x}, ↑q = x_1}.Nonempty
+    · use q
+      simp
+      have x_neq: x ≠ q
+      · by_contra hc
+        obtain⟨k, hk1, hk2⟩ := Q_is_dense Z  (↑q : Z) (sSup { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}) hq
+        norm_cast at hk1
 
 
 
@@ -309,6 +361,12 @@ theorem SℚRx_eq_SℚZSRZRZx (R Z : Type) [RealField R] [RealField Z] (x : R): 
 
 
 
+    have sSup_IsLUB: (IsLUB { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y} (sSup { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}))
+
+
+
+
+    have q_in_set: (↑ q:Z) ∈ { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}
 
 
 
@@ -316,7 +374,7 @@ theorem SℚRx_eq_SℚZSRZRZx (R Z : Type) [RealField R] [RealField Z] (x : R): 
 
 
 
-#print SR
+
 
 
 theorem SZR_is_SRZ_inv (R Z : Type) [RealField R] [RealField Z] : (SRZ Z R) ∘ (SRZ R Z) = id := by
