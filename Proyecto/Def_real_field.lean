@@ -101,7 +101,6 @@ theorem Q_is_dense (R : Type) [RealField R] (x y : R) (h : x < y) :
   exact exists_rat_btwn h
 --pendiente a demostrar por mi
 
-
 --conjunto de elementos en R (probar que es no vacío y acotado)
 def Sℚ (R : Type) [RealField R] : R → (Set ℚ) := fun x => {(q:ℚ ) | ↑ q < x}
 
@@ -128,9 +127,7 @@ lemma forall_x_SℚRx_bddabv (R : Type) [RealField R] (x : R) : BddAbove (Sℚ R
   apply le_of_lt at aux
   exact Rat.cast_le.mp aux
 
-
 --se puede modificar esto y aplicar que Sℚ R x es no vacío, sacando un testigo etc
-
 lemma forall_x_SRRx_nonempty (R : Type) [RealField R] (x : R) : (SR R x).Nonempty:= by
 
   have aux : x - 1 < x := by linarith
@@ -187,6 +184,12 @@ lemma Supx_is_idd (R : Type) [RealField R] :  Supx R = id := by
   have bddabv  := forall_x_SRRx_bddabv R x
   have IsLUBsup:= sSup_axiom (SR R x) nonempty bddabv
   exact IsLUBsup.unique xislub
+
+lemma Supx_is_idd2 (R : Type) [RealField R] :∀(x:R),  Supx R x = x := by
+  intro x
+  have idd:= Supx_is_idd R
+  rw[idd]
+  rfl
 
 --función definida, la que da el isomorfismo (a comprobar)
 --cambiar algún nombre
@@ -246,8 +249,6 @@ lemma SR_injective (R : Type) [RealField R] : Function.Injective (SR R) := by
   by_cases hc1: x < y
   sorry
   sorry
-
-
 
 def SRZ (R Z : Type) [RealField R] [RealField Z] :
   R → Z := fun x => sSup {(q : Z) | q ∈ Sℚ R x}
@@ -329,8 +330,6 @@ lemma rats_lt_sup_rats_bddabv (R Z : Type) [RealField R] [RealField Z] (x : R) :
   apply le_of_lt at this
   exact this
 
-
-
 --escribir teorema que demuestre que IsLUB set sup para acortar la demostración
 --para el futuro
 
@@ -408,6 +407,8 @@ theorem SℚRx_eq_SℚZSRZRZx (R Z : Type) [RealField R] [RealField Z] (x : R) :
       rw[aux] at hq
       linarith
 
+theorem compo (R Z:Type) [RealField R] [RealField Z] (x : R) :
+ (SRZ Z R ∘ SRZ R Z) x= SRZ Z R (SRZ R Z x):=rfl
 
 
 theorem SZR_is_SRZ_inv (R Z : Type) [RealField R] [RealField Z] : (SRZ Z R) ∘ (SRZ R Z) = id := by
@@ -415,32 +416,43 @@ theorem SZR_is_SRZ_inv (R Z : Type) [RealField R] [RealField Z] : (SRZ Z R) ∘ 
   funext x
   have:= SℚRx_eq_SℚZSRZRZx R Z x
   rw[id]
-  have compo: (SRZ Z R ∘ SRZ R Z) x= SRZ Z R (SRZ R Z x):=rfl
   rw[compo]
   rw[SRZ]
   rw[<-this,Sℚ]
-  by_contra hc
-  push_neg at hc
-  apply lt_or_gt_of_ne at hc
-  cases' hc with hlt hgt
-  obtain ⟨p, hp1, hp2⟩ := Q_is_dense R (sSup {y : R | ∃ q  ∈ {q:ℚ | ↑q < (x : R)}, (↑q : R) = y}) x hlt
-  have pinset1 : p ∈ {q : ℚ| ↑q < x}:= hp2
-  have copinset: ↑p ∈ {y : R | ∃ q  ∈ {q:ℚ | ↑q < (x : R)}, (↑q : R) = y} := by simp; exact hp2
-  have set_eq_set: {y : R | ∃ q  ∈ {q:ℚ | ↑q < (x : R)}, (↑q : R) = y}={y : R | ∃ (q : ℚ) , ↑q < (x : R) ∧ (↑q : R) = y} := by rfl
-  rw[set_eq_set] at *
-  have nonempt2 := rats_lt_sup_rats_nonempt R R x
-  have bddabv2  := rats_lt_sup_rats_bddabv R R x
+  exact Supx_is_idd2 R x
 
-  have sup_IsLUB:= sSup_axiom {y : R | ∃ (q : ℚ) , ↑q < (x : R) ∧ (↑q : R) = y} nonempt2 bddabv2
+theorem SZR_SRZ_x_eq_x (R Z : Type) [RealField R] [RealField Z] :
+  ∀(x : R), ((SRZ Z R) ∘ (SRZ R Z)) x = x := by
 
+  intro x
+  have idd:= SZR_is_SRZ_inv R Z
+  rw[idd]
+  rfl
 
+theorem SRZ_is_bijective (R Z : Type) [RealField R] [RealField Z] :
+  Function.Bijective (SRZ R Z) := by
 
+  have bij_if_inv: Function.Bijective (SRZ R Z) ↔
+  ∃ g, Function.LeftInverse g (SRZ R Z) ∧ Function.RightInverse g (SRZ R Z):=by
+    exact Function.bijective_iff_has_inverse
+  rw [bij_if_inv]
+  use (SRZ Z R)
 
+  constructor
 
+  · rw[Function.LeftInverse]
+    intro x
+    rw[<-compo]
+    have := SZR_SRZ_x_eq_x
+    specialize this R Z x
+    exact this
 
-
-
-  sorry
+  · rw[Function.RightInverse]
+    intro z
+    rw[<-compo]
+    have := SZR_SRZ_x_eq_x
+    specialize this Z R z
+    exact this
 
 --teorema a demostrar
 theorem Uniqueness_Real_Numbers (X Y : Type) [RealField X] [RealField Y] :
@@ -452,29 +464,4 @@ theorem Uniqueness_Real_Numbers (X Y : Type) [RealField X] [RealField Y] :
 
   sorry
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     --ya tenemos la contradicción, por transitividad
-
-
-
-
-#print RealField
