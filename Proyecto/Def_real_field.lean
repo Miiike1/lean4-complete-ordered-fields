@@ -5,7 +5,6 @@ class RealField (R : Type) extends SupSet R, Field R, LinearOrder R, IsStrictOrd
 variable {X : Type} [RealField X]
 variable {Y : Type} [RealField Y]
 
-
 open RealField
 
 --print para ver teoremas, axiomas y props dados por la clase
@@ -154,9 +153,6 @@ lemma forall_x_SRRx_bddabv (R : Type) [RealField R] (x : R) : BddAbove (SR R x) 
   linarith
 
 
---def Sℚ (R : Type) [RealField R] : R → (Set ℚ) := fun x => {(q:ℚ ) | (q:R) < x}
---def SR (R : Type) [RealField R] : R → (Set X ) := fun x => { (q : X) | q ∈ Sℚ R x}
-
 def Supx (R : Type) [RealField R] : R → R := fun x => sSup (SR R x)
 
 
@@ -240,15 +236,6 @@ lemma Sℚ_inj (R) [RealField R] : Function.Injective (Sℚ R):= by
       · exact hqinSQX
       · exact hqnoinSQY
     trivial
-
-lemma SR_injective (R : Type) [RealField R] : Function.Injective (SR R) := by
-  intro x y hxy
-  rw[SR, SR] at hxy
-  by_contra hc
-  push_neg at hc
-  by_cases hc1: x < y
-  sorry
-  sorry
 
 def SRZ (R Z : Type) [RealField R] [RealField Z] :
   R → Z := fun x => sSup {(q : Z) | q ∈ Sℚ R x}
@@ -407,7 +394,7 @@ theorem SℚRx_eq_SℚZSRZRZx (R Z : Type) [RealField R] [RealField Z] (x : R) :
       rw[aux] at hq
       linarith
 
-theorem compo (R Z:Type) [RealField R] [RealField Z] (x : R) :
+theorem compo (R Z : Type) [RealField R] [RealField Z] (x : R) :
  (SRZ Z R ∘ SRZ R Z) x= SRZ Z R (SRZ R Z x):=rfl
 
 
@@ -454,6 +441,71 @@ theorem SRZ_is_bijective (R Z : Type) [RealField R] [RealField Z] :
     specialize this Z R z
     exact this
 
+
+def addset {R : Type} [Ring R] :
+  (Set R) → (Set R) → (Set R) := fun  U V => {(x : R) | ∃ u ∈ U, ∃ v ∈ V, x = u + v }
+
+lemma Sℚ_x_add_Sℚ_y_eq_Sℚ_A_addset_B {R : Type} [RealField R] (x : R) (y : R) :
+  addset (Sℚ R x) (Sℚ R y) = Sℚ R (x + y) := by
+  rw[addset,Sℚ,Sℚ,Sℚ]
+  apply Set.ext_iff.mpr
+  intro k
+  constructor
+
+  · simp
+    intro x1 hx1 x2 hx2 hk
+    rw[hk, Rat.cast_add]
+    linarith
+
+  · simp
+    intro h
+    have ineq : (x + y - ↑k)/2 >0 := by linarith
+    have : x-(x + y - ↑k)/2 < x := by linarith
+    obtain ⟨p,hp1,hp2⟩ := Q_is_dense R (x-(x + y - ↑k)/2) x this
+
+    use p
+    constructor
+    · exact hp2
+    · use k - p
+      constructor
+      · rw[Rat.cast_sub]
+        linarith
+      · simp
+
+
+lemma sup_ad_eq_ad_sup {R : Type} [RealField R] (x y : R) :
+   Supx R (x+y) = Supx R x + Supx R y:= by
+
+  have ineq1 : Supx R (x+y) ≤  Supx R x + Supx R y
+  ·
+    sorry
+  sorry
+
+
+
+
+
+
+
+
+
+
+--theorem sSup_SℚRx_plus_y_eq_sSup_SℚRx_plus_SℚRy {R:Type} [RealField R] (x y : R): Sℚ R (x + y) = (Sℚ R x) addset (Sℚ R x)
+
+
+
+
+
+
+
+theorem add_preserved {R Z:Type} [RealField R] [RealField Z] :
+  ∀ (x y : R) ,  SRZ R Z (x + y) =  SRZ R Z x + SRZ R Z y := by
+  intro x y
+  rw[SRZ, SRZ]
+  sorry
+
+
+
 --teorema a demostrar
 theorem Uniqueness_Real_Numbers (X Y : Type) [RealField X] [RealField Y] :
   ∃ f : X → Y,
@@ -462,6 +514,8 @@ theorem Uniqueness_Real_Numbers (X Y : Type) [RealField X] [RealField Y] :
     (∀ x y, f (x * y) = f x * f y) ∧
     (∀ x y, x < y → f x < f y) := by
 
-  sorry
+  use SRZ X Y
+  constructor
+  · exact  SRZ_is_bijective X Y
 
-    --ya tenemos la contradicción, por transitividad
+  sorry
