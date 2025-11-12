@@ -294,6 +294,14 @@ lemma rats_lt_sup_rats_nonempt (R Z : Type) [RealField R] [RealField Z] (x : R) 
   simp
   exact hq
 
+
+lemma coSℚRx_nonempt_in_Z (R Z : Type) [RealField R] [RealField Z] (x : R) :
+  {(q : Z) | q ∈ Sℚ R x}.Nonempty := by
+
+  have: {(q : Z) | q ∈ Sℚ R x} =  { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}:= by rfl
+  rw[this]; exact rats_lt_sup_rats_nonempt R Z x
+
+
 lemma rats_lt_x_bddabv {R : Type} [RealField R] (x : R) :
   BddAbove {q : ℚ | ↑q < x }:= by
 
@@ -304,6 +312,7 @@ lemma rats_lt_x_bddabv {R : Type} [RealField R] (x : R) :
   apply lt_trans ha at hp1
   norm_cast at hp1
   exact le_of_lt hp1
+
 
 lemma rats_lt_sup_rats_bddabv (R Z : Type) [RealField R] [RealField Z] (x : R) :
   BddAbove { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y} := by
@@ -316,6 +325,11 @@ lemma rats_lt_sup_rats_bddabv (R Z : Type) [RealField R] [RealField Z] (x : R) :
   have :=  pR_lt_x_le_qR_y_eq_pZ_y_le_qZ R Z x a r p ha1 hp1 ha2
   apply le_of_lt at this
   exact this
+
+lemma coSℚRx_bdd_in_Z (R Z : Type) [RealField R] [RealField Z] (x : R) :
+  BddAbove {(q : Z) | q ∈ Sℚ R x} := by
+  have: {(q : Z) | q ∈ Sℚ R x} =  { y:Z | ∃ (q : ℚ), (↑q < (x : R)) ∧ (↑q : Z) = y}:= by rfl
+  rw[this]; exact rats_lt_sup_rats_bddabv R Z x
 
 --escribir teorema que demuestre que IsLUB set sup para acortar la demostración
 --para el futuro
@@ -475,16 +489,52 @@ lemma Sℚ_x_add_Sℚ_y_eq_Sℚ_A_addset_B {R : Type} [RealField R] (x : R) (y :
 
 lemma sup_ad_eq_ad_sup {R : Type} [RealField R] (x y : R) :
    Supx R (x+y) = Supx R x + Supx R y:= by
+  rw[ Supx_is_idd2 R (x+y), Supx_is_idd2 R x, Supx_is_idd2 R y]
 
-  have ineq1 : Supx R (x+y) ≤  Supx R x + Supx R y
+
+lemma SRZ_preserves_add (R Z: Type) [RealField R] [RealField Z]  (x y : R) :
+  SRZ R Z (x + y) = SRZ R Z x + SRZ R Z y := by
+  have hlt:  SRZ R Z (x + y) ≤ SRZ R Z x + SRZ R Z y
+
+  have nonemptco1 := coSℚRx_nonempt_in_Z R Z (x+y)
+  have nonemptco2 := coSℚRx_nonempt_in_Z R Z x
+  have nonemptco3 := coSℚRx_nonempt_in_Z R Z y
+  have bddabvco1  := coSℚRx_bdd_in_Z R Z (x+y)
+  have bddabvco2  := coSℚRx_bdd_in_Z R Z x
+  have bddabvco3  := coSℚRx_bdd_in_Z R Z y
+  have IsLUB1     := sSup_axiom {(q : Z) | q ∈ Sℚ R (x+y)} nonemptco1 bddabvco1
+  have IsLUB2     := sSup_axiom {(q : Z) | q ∈ Sℚ R x} nonemptco2 bddabvco2
+  have IsLUB3     := sSup_axiom {(q : Z) | q ∈ Sℚ R y} nonemptco3 bddabvco3
+
+  · have ltforallainset: ∀ a ∈ {(q : Z) | q ∈ Sℚ R (x+y)}, a ≤ SRZ R Z x + SRZ R Z y
+
+    · rw[SRZ,SRZ, <- Sℚ_x_add_Sℚ_y_eq_Sℚ_A_addset_B, addset]
+      simp
+      intro a q1 q2 hq2 q3 hq3 hq11 hq12
+
+      have q2_lt_supSQx: ↑q2 ≤ SRZ R Z x
+      · rw[SRZ]
+
+        have q2_in_set: ↑q2 ∈ {x_1 : Z | ∃ q ∈ Sℚ R x, ↑q = x_1}
+        · simp; exact hq2
+        apply IsLUB2.1 at q2_in_set; exact q2_in_set
+
+      have q3_lt_supSQx: ↑q3 ≤ SRZ R Z y
+      · rw[SRZ]
+
+        have q3_in_set: ↑q3 ∈ {x_1 : Z | ∃ q ∈ Sℚ R y, ↑q = x_1}
+        · simp; exact hq3
+        apply IsLUB3.1 at q3_in_set; exact q3_in_set
+
+      have: (↑q1 : Z) = ↑q2 + ↑q3:= by norm_cast
+      rw[<-SRZ,<-SRZ]
+      linarith
+
+    have isupbd: (SRZ R Z x + SRZ R Z y) ∈ upperBounds {(q : Z) | q ∈ Sℚ R (x+y)}:= by exact ltforallainset
+    exact IsLUB1.2 isupbd
+
+  have hgt: SRZ R Z x + SRZ R Z y ≤  SRZ R Z (x + y)
   ·
-    sorry
-  sorry
-
-
-
-
-
 
 
 
