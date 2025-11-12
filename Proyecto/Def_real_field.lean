@@ -494,7 +494,6 @@ lemma sup_ad_eq_ad_sup {R : Type} [RealField R] (x y : R) :
 
 lemma SRZ_preserves_add (R Z: Type) [RealField R] [RealField Z]  (x y : R) :
   SRZ R Z (x + y) = SRZ R Z x + SRZ R Z y := by
-  have hlt:  SRZ R Z (x + y) ≤ SRZ R Z x + SRZ R Z y
 
   have nonemptco1 := coSℚRx_nonempt_in_Z R Z (x+y)
   have nonemptco2 := coSℚRx_nonempt_in_Z R Z x
@@ -506,6 +505,7 @@ lemma SRZ_preserves_add (R Z: Type) [RealField R] [RealField Z]  (x y : R) :
   have IsLUB2     := sSup_axiom {(q : Z) | q ∈ Sℚ R x} nonemptco2 bddabvco2
   have IsLUB3     := sSup_axiom {(q : Z) | q ∈ Sℚ R y} nonemptco3 bddabvco3
 
+  have hlt:  SRZ R Z (x + y) ≤ SRZ R Z x + SRZ R Z y
   · have ltforallainset: ∀ a ∈ {(q : Z) | q ∈ Sℚ R (x+y)}, a ≤ SRZ R Z x + SRZ R Z y
 
     · rw[SRZ,SRZ, <- Sℚ_x_add_Sℚ_y_eq_Sℚ_A_addset_B, addset]
@@ -524,6 +524,7 @@ lemma SRZ_preserves_add (R Z: Type) [RealField R] [RealField Z]  (x y : R) :
 
         have q3_in_set: ↑q3 ∈ {x_1 : Z | ∃ q ∈ Sℚ R y, ↑q = x_1}
         · simp; exact hq3
+
         apply IsLUB3.1 at q3_in_set; exact q3_in_set
 
       have: (↑q1 : Z) = ↑q2 + ↑q3:= by norm_cast
@@ -534,7 +535,40 @@ lemma SRZ_preserves_add (R Z: Type) [RealField R] [RealField Z]  (x y : R) :
     exact IsLUB1.2 isupbd
 
   have hgt: SRZ R Z x + SRZ R Z y ≤  SRZ R Z (x + y)
-  ·
+
+  · have gtforallainset :
+    ∀ a, a ∈ { (q : Z) | q ∈ Sℚ R x } →
+    ∀ b, b ∈ { (q : Z) | q ∈ Sℚ R y } →
+    a + b ≤ SRZ R Z (x + y)
+
+    intro a ha b hb
+    rw[SRZ]
+    rw[<-Sℚ_x_add_Sℚ_y_eq_Sℚ_A_addset_B x y]
+    have: (a + b) ∈ {x_1 | ∃ q ∈ addset (Sℚ R x) (Sℚ R y), ↑q = x_1}
+    · simp at ha
+      obtain ⟨q,hq1,hq2⟩:= ha
+      simp at hb
+      obtain ⟨p,hp1,hp2⟩:= hb
+      rw[<-hq2,<-hp2]
+      use (q+p)
+      constructor
+      · rw[addset]
+        simp
+        use q
+        constructor
+        · exact hq1
+        · use p
+      norm_cast
+    rw[Sℚ_x_add_Sℚ_y_eq_Sℚ_A_addset_B]
+    rw[Sℚ_x_add_Sℚ_y_eq_Sℚ_A_addset_B] at this
+    apply IsLUB1.1 at this
+    exact this
+    rw[SRZ,SRZ]
+
+
+
+
+
 
 
 
