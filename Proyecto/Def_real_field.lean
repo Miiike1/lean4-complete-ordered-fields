@@ -411,6 +411,34 @@ theorem SℚRx_eq_SℚZSRZRZx (R Z : Type) [RealField R] [RealField Z] (x : R) :
 theorem compo (R Z : Type) [RealField R] [RealField Z] (x : R) :
  (SRZ Z R ∘ SRZ R Z) x= SRZ Z R (SRZ R Z x):=rfl
 
+theorem gt_sup_if_upbd {R : Type}
+ [RealField R] (x : R) (A : Set R) (ha : ∀ a ∈ A, a ≤ x) :
+  A.Nonempty → sSup A ≤ x:= by
+  intro nnempt
+  have : BddAbove A := by
+    use x
+    rw[upperBounds]
+    simp
+    intro b hb
+    apply ha at hb
+    exact hb
+  have supIsLUB:= (sSup_axiom A nnempt this).2
+  have x_upbd: x ∈ upperBounds A := by
+    rw[upperBounds]
+    simp
+    intro b hb
+    apply ha at hb
+    exact hb
+  apply supIsLUB at x_upbd
+  exact x_upbd
+
+
+
+
+
+
+
+
 
 theorem SZR_is_SRZ_inv (R Z : Type) [RealField R] [RealField Z] : (SRZ Z R) ∘ (SRZ R Z) = id := by
 
@@ -565,6 +593,13 @@ lemma SRZ_preserves_add (R Z: Type) [RealField R] [RealField Z]  (x y : R) :
     exact this
     rw[SRZ,SRZ]
 
+    have (a b c: R) : a+b ≤ c ↔ a ≤ c - b := by
+      constructor
+      · intro habc
+        linarith
+      · intro habc
+        linarith
+
 
 
 
@@ -575,18 +610,6 @@ lemma SRZ_preserves_add (R Z: Type) [RealField R] [RealField Z]  (x y : R) :
 
 
 --theorem sSup_SℚRx_plus_y_eq_sSup_SℚRx_plus_SℚRy {R:Type} [RealField R] (x y : R): Sℚ R (x + y) = (Sℚ R x) addset (Sℚ R x)
-
-
-
-
-
-
-
-theorem add_preserved {R Z:Type} [RealField R] [RealField Z] :
-  ∀ (x y : R) ,  SRZ R Z (x + y) =  SRZ R Z x + SRZ R Z y := by
-  intro x y
-  rw[SRZ, SRZ]
-  sorry
 
 
 
