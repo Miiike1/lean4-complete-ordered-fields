@@ -174,7 +174,7 @@ lemma Sℚ_inj (R) [RealField R] : Function.Injective (Sℚ R):= by
     trivial
 
 
-theorem x_eqy_iff_SℚRx_eq_SℚRy {R : Type} [RealField R] (x y : R) : x = y ↔ Sℚ R x = Sℚ R y := by
+theorem x_eq_y_iff_SℚRx_eq_SℚRy {R : Type} [RealField R] (x y : R) : x = y ↔ Sℚ R x = Sℚ R y := by
   constructor
   · intro heq
     rw[heq]
@@ -285,7 +285,6 @@ theorem x_lt_x_add_one {R : Type} [RealField R] {x : R} : x < x + 1 := by linari
 
 theorem x_sub_one_lt_x {R : Type} [RealField R] {x : R} : x - 1 < x := by linarith
 
-
 theorem pR_lt_x_le_qR_y_eq_pZ_y_le_qZ (R Z : Type) [RealField R] [RealField Z]
   (x : R) (y : Z) (p q : ℚ) : ↑ p < x →  x ≤ ↑q →  y = ↑ p → y <  ↑q := by
 
@@ -354,9 +353,26 @@ lemma coSℚRx_bdd_in_Z (R Z : Type) [RealField R] [RealField Z] (x : R) :
 --pero necesito formalizar el resultado
 
 --revisar esto con el lema x_eq_y_iff_SℚRy=....
-theorem SℚRx_eq_SℚZy_iff_SRZRZx_eq_y (R Z : Type) [RealField R] [RealField Z] (x : R) (y : Z) :
-  (Sℚ R x = Sℚ Z y) ↔ SRZ R Z x = y := by
-  sorry
+
+
+
+theorem A_nonem_bddabv_p_upbd_if_p_gt_sup
+    {R : Type} [RealField R] {A : Set R} (p : R) :
+    A.Nonempty → BddAbove A → sSup A < p → p ∈ upperBounds A := by
+  intro nonem bdd
+  have := sSup_axiom A nonem bdd
+  intro hp
+  obtain ⟨h1, h2⟩:= this
+  intro a ha
+  rw[upperBounds] at h1
+  simp at h1
+  apply h1 at ha
+  linarith
+
+
+
+
+
 
 theorem SℚRx_eq_SℚZSRZRZx (R Z : Type) [RealField R] [RealField Z] (x : R) :
   Sℚ R x = Sℚ Z (SRZ R Z x):= by
@@ -546,25 +562,313 @@ lemma sup_ad_eq_ad_sup {R : Type} [RealField R] (x y : R) :
 lemma SRZ_preserves_add (R Z : Type) [RealField R] [RealField Z] (x y : R) :
   SRZ R Z (x + y) = SRZ R Z x + SRZ R Z y := by
 
-  rw[x_eqy_iff_SℚRx_eq_SℚRy]
+  rw[x_eq_y_iff_SℚRx_eq_SℚRy]
   rw[<- SℚRx_eq_SℚZSRZRZx]
   rw[<-Sℚ_x_addset_Sℚ_y_eq_Sℚ_x_add_y]
   rw[<-Sℚ_x_addset_Sℚ_y_eq_Sℚ_x_add_y]
   rw[<- SℚRx_eq_SℚZSRZRZx,<- SℚRx_eq_SℚZSRZRZx]
 
+lemma zero_to_zero (R Z : Type) [RealField R] [RealField Z] : SRZ R Z 0 = 0:= by
+    have zero_eq : (0 : R) = 0 + 0 := by linarith
+    have srz_eq1 : SRZ R Z 0 =  SRZ R Z (0 + 0) := by nth_rewrite 1 [zero_eq]; rfl
+    have srz_eq2 : SRZ R Z 0 = SRZ R Z 0 + SRZ R Z 0  := by
+      rw[ SRZ_preserves_add R Z 0 0] at srz_eq1
+      exact srz_eq1
+    linarith
 
 def mulset {R : Type} [Ring R] :
   (Set R) → (Set R) → (Set R) := fun  U V => {(x : R) | ∃ u ∈ U, ∃ v ∈ V, x = u * v }
 
-lemma Sℚ_x_mul_Sℚ_y_eq_Sℚ_A_mulset_B {R : Type} [RealField R] (x : R) (y : R) :
-  mulset (Sℚ R x) (Sℚ R y) = Sℚ R (x * y) := by
-  sorry
+lemma gtzero_Sℚx_mulset_gtzeroSℚy_eq_gtzeroSℚxy
+{R : Type} [RealField R] (x : R) (y : R) (hx : 0 < x) (hy : 0 < y) :
+
+  mulset { q : ℚ | q > 0 ∧ q ∈ Sℚ R x } { q : ℚ | q > 0 ∧ q ∈ Sℚ R y }
+  = { q : ℚ | q > 0 ∧ q ∈ Sℚ R (x*y) } := by
+  rw[Set.ext_iff]
+  intro a
+  constructor
+  · rw[mulset]
+    simp
+    intro x1 hx11 hx12 x2 hx21 hx22 hax1x2
+    constructor
+    · rw[hax1x2]
+      exact mul_pos hx11 hx21
+    · rw[Sℚ] at *
+      simp
+
+      have hcox11: 0 < (↑ x1 : R)
+      · norm_cast
+
+      have hcox21: 0 < (↑ x2 : R)
+      · norm_cast
+
+      have eqq : (a : R) = (x1 : R) * (x2 : R)
+      · rw [hax1x2]
+        rw[Rat.cast_mul]
+
+      rw[hax1x2,Rat.cast_mul]
+      simp at hx22
+      simp at hx12
+      exact mul_lt_mul_of_pos hx12 hx22 hcox11 hy
+  · simp
+    rw[Sℚ, mulset]
+    simp
+    intro ha1 ha2
+    have hcoa2: 0 < (↑ a:R) := by
+      norm_cast
+
+    have ineq_1 : 0 < (x*y)/a
+    · have ineq_2 : 1 < (x*y)/a := by
+        field_simp
+        exact ha2
+      linarith
+
+    have ineq_3: x / ((x * y)/a) < x := by
+      field_simp
+      exact ha2
+
+    have ineq_4: 0 < x / ((x * y)/a) := by
+      field_simp
+      simp
+      exact ha1
+
+    obtain ⟨p,hp1,hp2⟩ := Q_is_dense R (x/((x * y)/a)) x ineq_3
+    have ineq_5 := lt_trans ineq_4 hp1
+    use p
+    constructor
+
+    · constructor
+
+      · norm_cast at ineq_5
+
+      · exact hp2
+    · use a/p
+      constructor
+      · constructor
+        · norm_cast at ineq_5
+          exact div_pos ha1 ineq_5
+        · rw[Sℚ]
+          simp
+          field_simp at *
+          exact hp1
+      field_simp
+      norm_cast at ineq_5
+      rw[div_self ]; linarith
+
+
+lemma a_lt_b_Sℚa_in_Sℚb (R : Type) [RealField R] (a b : R) : a ≤ b ↔ Sℚ R a ⊆ Sℚ R b := by
+  constructor
+  · intro hab
+    intro q
+    intro hq
+    rw[Sℚ] at *
+    simp at *
+    linarith
+  · intro hab
+    rw[Sℚ, Sℚ] at hab
+    simp at hab
+    by_contra hc
+    push_neg at hc
+    obtain ⟨q, hq1, hq2⟩ := Q_is_dense R b a hc
+    specialize hab q
+    have := hab hq2
+    linarith
+
+lemma A_in_B_supA_lt_supB (R : Type)[RealField R] (A B : Set R) :
+   A ⊆ B →  A.Nonempty → BddAbove B → sSup A ≤ sSup B := by
+  intro AB noneA Bbdd
+  have noneB : B.Nonempty := by exact Set.Nonempty.mono AB noneA
+  have Abdd : BddAbove A
+  · rw[BddAbove] at Bbdd
+    rw[upperBounds] at Bbdd
+    obtain ⟨x, hx⟩:=Bbdd
+    simp at hx
+    use x
+    intro a ha
+    have aB : a∈B := by
+      exact Set.mem_of_subset_of_mem AB ha
+    exact hx aB
+  have ISLUBA := sSup_axiom A noneA Abdd
+  have ISLUBB := sSup_axiom B noneB Bbdd
+  have clue := ISLUBA.right
+  have supBuppbd : sSup B ∈ upperBounds A
+  · intro b hb
+    have bB : b  ∈ B := by
+      exact Set.mem_of_subset_of_mem AB hb
+    exact ISLUBB.left bB
+  apply clue at supBuppbd
+  exact supBuppbd
 
 
 
-lemma SRZ_preserves_mul (R Z : Type) [RealField R] [RealField Z] (x y : R) :
+lemma supZ_SℚRx_gt_0_eq_SRZRZx_x_gt_0
+  (R Z : Type)[RealField R][RealField Z] (x : R ) : 0 < x →
+   sSup { y : Z | ∃ q ∈ Sℚ R x, y = (q : Z) ∧ 0 < q}
+  = SRZ R Z x := by
+  intro hx
+
+  obtain ⟨q,hq1,hq2⟩:= Q_is_dense R 0 x hx
+  obtain ⟨k, hk1,hk2⟩:= Q_is_dense R x (x+1) x_lt_x_add_one
+  have nonem1: {y : Z | ∃ q ∈ Sℚ R x, y = ↑q }.Nonempty
+  · use q
+    rw[Sℚ]
+    simp
+    exact hq2
+
+  have nonem2: {y : Z | ∃ q ∈ Sℚ R x, y = ↑q ∧ 0 < q}.Nonempty
+  · use q
+    simp
+    constructor
+    · exact hq2
+    · norm_cast at hq1
+  have bdd : BddAbove {y : Z | ∃ q ∈ Sℚ R x, y = ↑q ∧ 0 < q}
+  · rw[BddAbove]
+    use k
+    rw[upperBounds]
+    simp
+    intro a x1 hx1 ha hx2
+    rw[Sℚ] at hx1
+    simp at hx1
+    rw[ha]
+    have := lt_trans hx1 hk1
+    norm_cast
+    norm_cast at this
+    linarith
+  have bdd1 : BddAbove {y : Z | ∃ q ∈ Sℚ R x, y = ↑q}
+  · obtain ⟨q, hq1, hq2⟩:= Q_is_dense R x (x+1) x_lt_x_add_one
+    use q
+    intro k hk
+    rw[Sℚ] at hk
+    simp at hk
+    obtain ⟨nat, hnat1, hnat2⟩:= hk
+    rw[hnat2]
+    have := lt_trans hnat1 hq1
+    norm_cast at this
+    norm_cast
+    linarith
+  have eqq : {y : Z | ∃ q ∈ Sℚ R x, y = ↑q} = {y : Z | ∃ q ∈ Sℚ R x, ↑q = y} := by
+    ext a
+    constructor
+    · intro ha
+      simp at ha
+      simp
+      obtain ⟨q, hq1, hq2⟩:= ha
+      use q
+      constructor
+      · exact hq1
+      · symm
+        exact hq2
+    · intro ha
+      simp at ha
+      simp
+      obtain ⟨q, hq1, hq2⟩:= ha
+      use q
+      constructor
+      · exact hq1
+      · symm
+        exact hq2
+  have inn: {y : Z | ∃ q ∈ Sℚ R x, y = ↑q ∧ 0 < q}  ⊆   {y : Z | ∃ q ∈ Sℚ R x, y = ↑q } := by
+    intro a ha
+    obtain ⟨b, ha1, ha2, ha3⟩ := ha
+    simp
+    use b
+  have ISLUBsSup := sSup_axiom {y : Z | ∃ q ∈ Sℚ R x, y = ↑q} nonem1 bdd1
+  have ISLUB0srz : IsLUB {y : Z | ∃ q ∈ Sℚ R x, y = ↑q ∧ 0 < q} (SRZ R Z x):= by
+    constructor
+    · intro a ha
+      have aux1 : a ∈ {y | ∃ q ∈ Sℚ R x, y = ↑q} := by
+        obtain ⟨k, ha1, ha2, ha3⟩:=ha
+        simp
+        use k
+      rw[SRZ]
+      have aux2 :=
+        A_in_B_supA_lt_supB Z {y | ∃ q ∈ Sℚ R x, y = ↑q ∧ 0 < q}
+        {y | ∃ q ∈ Sℚ R x, y = ↑q} inn nonem2 bdd1
+      apply ISLUBsSup.left at aux1
+      rw[<-eqq]
+      linarith
+    intro upp hupp
+    have upp_gt_0 : 0 < upp
+    · rw[upperBounds] at hupp
+      simp at hupp
+      obtain ⟨e, ee, he2, he3, he4⟩:= nonem2
+      have saver1 := he3
+      have saver2 := he4
+      apply hupp at he2
+      apply he2 at he3
+      apply he3 at he4
+      rw[saver1] at he4
+      have ineq : 0 < (↑ee : Z) := by norm_cast
+      linarith
+    have upp_uppbdd : upp ∈ upperBounds {y | ∃ q ∈ Sℚ R x, y = ↑q }:= by
+      rw[upperBounds]
+      simp
+      intro r  b ha1 ha3
+      by_cases hr : r ≤ 0
+      · rw[Sℚ] at ha1
+        simp at ha1
+        rw[ha3] at hr
+        rw[ha3]
+        linarith
+      · push_neg at hr
+        have : r ∈ {y : Z| ∃ q ∈ Sℚ R x, y = ↑q ∧ 0 < q}:= by
+          simp
+          use b
+          constructor
+          · exact ha1
+          · constructor
+            · exact ha3
+            · rw[ha3] at hr
+              norm_cast at hr
+        rw[upperBounds] at hupp
+        apply hupp at this
+        exact this
+    have := ISLUBsSup.right
+    apply this at upp_uppbdd
+    rw[SRZ, <- eqq]
+    exact upp_uppbdd
+  rw[SRZ, <- eqq] at ISLUB0srz
+  rw[SRZ, <- eqq]
+  have ISLUB0sSup := sSup_axiom {y : Z| ∃ q ∈ Sℚ R x, y = ↑q ∧ 0 < q} nonem2 bdd
+  exact IsLUB.unique ISLUB0sSup ISLUB0srz
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+lemma SRZ_preserves_mul_x_y_pos (R Z : Type) [RealField R] [RealField Z] (x y : R) :(0<x) → (0<y) →
   SRZ R Z (x * y) = SRZ R Z x * SRZ R Z y := by
-  sorry
+  intro hx hy
+
+
+
+
+      -- (etc)
+
 
 
 --teorema a demostrar
