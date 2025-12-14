@@ -986,6 +986,10 @@ lemma SRZ_preserves_mul_x_y_pos (R Z : Type) [RealField R] [RealField Z] (x y : 
   · exact hy
   · exact hx
 
+lemma mSRZmx_eq_SRZx (R Z : Type)
+ [RealField R] [RealField Z] (x : R) : SRZ R Z x = -SRZ R Z (-x) := by
+  rw[SRZminusx_eq_minusSRZx]; simp
+
 lemma SRZ_preserves_mul_x_y_neg (R Z : Type) [RealField R] [RealField Z] (x y : R) :(x<0) → (y<0) →
   SRZ R Z (x * y) = SRZ R Z x * SRZ R Z y := by
 
@@ -993,11 +997,76 @@ lemma SRZ_preserves_mul_x_y_neg (R Z : Type) [RealField R] [RealField Z] (x y : 
   have mx_pos  : 0 < -x := by linarith
   have my_pos  : 0 < -y := by linarith
   have prod_pos: x*y = (-x)*(-y) := by field_simp
-  have mSRZmx_eq_SRZx : -SRZ R Z (-x) = SRZ R Z x
-  · rw[SRZminusx_eq_minusSRZx]; simp
+  have mSRZmx_eq_SRZ_x : SRZ R Z x = -SRZ R Z (-x)
+  · exact mSRZmx_eq_SRZx R Z x
+  have mSRZmy_eq_SRZ_y : SRZ R Z y = -SRZ R Z (-y)
+  · exact mSRZmx_eq_SRZx R Z y
 
   rw[prod_pos]
+  rw[mSRZmx_eq_SRZ_x, mSRZmy_eq_SRZ_y]
+  rw[SRZ_preserves_mul_x_y_pos R Z (-x) (-y) mx_pos my_pos]
+  simp
 
+lemma SRZ_preserves_mul_diff_sign (R Z : Type)
+  [RealField R] [RealField Z] (x y : R) : (x < 0 ∧ 0 < y) ∨ (0 < x ∧ y < 0) →
+  SRZ R Z (x * y) = SRZ R Z x * SRZ R Z y := by
+  intro or
+  cases' or with h1 h2
+  · obtain ⟨hx, hy⟩ := h1
+    have hx' : 0 < -x := by linarith
+    have aux :  SRZ R Z (x * y) = - SRZ R Z (-(x * y))
+    · exact mSRZmx_eq_SRZx R Z (x*y)
+    have aux1 : -(x*y) = (-x)*y := by linarith
+    rw[aux1] at aux
+    rw[SRZ_preserves_mul_x_y_pos R Z (-x) y hx' hy] at aux
+    rw[mSRZmx_eq_SRZx R Z x]
+    simp at *
+    exact aux
+  · obtain ⟨hx, hy⟩ := h2
+    have hy' : 0 < -y := by linarith
+    have aux :  SRZ R Z (x * y) = - SRZ R Z (-(x * y))
+    · exact mSRZmx_eq_SRZx R Z (x*y)
+    have aux1 : -(x*y) = x*(-y) := by linarith
+    rw[aux1] at aux
+    rw[SRZ_preserves_mul_x_y_pos R Z x (-y) hx hy'] at aux
+    rw[mSRZmx_eq_SRZx R Z y]
+    simp at *
+    exact aux
+
+theorem SRZ_preserves_mul (R Z : Type)
+  [RealField R] [RealField Z] (x y : R) : SRZ R Z (x * y) = SRZ R Z x * SRZ R Z y := by
+  by_cases hxlt :  x < 0
+  · by_cases hylt : y < 0
+
+    · exact SRZ_preserves_mul_x_y_neg R Z x y hxlt hylt
+    · by_cases hyeq : y = 0
+      · rw[hyeq]; simp; rw[zero_to_zero]; simp
+      · push_neg at *
+        have hygt : 0<y := by exact lt_of_le_of_ne' hylt hyeq
+        have or : (x < 0 ∧ 0 < y) ∨ (0<x ∧ y < 0)
+        · left
+          constructor
+          · exact hxlt
+          · exact hygt
+        exact SRZ_preserves_mul_diff_sign R Z x y or
+  by_cases hxeq : x=0
+  · rw[hxeq]; simp; rw[zero_to_zero]; simp
+  push_neg at *
+  have hxgt : 0<x := by exact lt_of_le_of_ne' hxlt hxeq
+  by_cases hylt : y < 0
+  · have or : (x < 0 ∧ 0 < y) ∨ (0<x ∧ y < 0)
+    · right
+      constructor
+      · exact hxgt
+      · exact hylt
+    exact SRZ_preserves_mul_diff_sign R Z x y or
+  · push_neg at hylt
+    by_cases hyeq : y=0
+    · rw[hyeq]; simp; rw[zero_to_zero]; simp
+    · have hygt : 0<y
+      · push_neg at hyeq
+        exact lt_of_le_of_ne' hylt hyeq
+      exact SRZ_preserves_mul_x_y_pos R Z x y hxgt hygt
 
 --teorema a demostrar
 theorem Uniqueness_Real_Numbers (X Y : Type) [RealField X] [RealField Y] :
