@@ -6,8 +6,7 @@ variable {X : Type} [RealField X]
 variable {Y : Type} [RealField Y]
 
 open RealField
---print para ver teoremas, axiomas y props dados por la clase
---escribo teoremas útliles para el futuro
+
 lemma supA_lt_x_in_upbdA {A : Set X} (a : X) (hA : A.Nonempty)
  (hB : BddAbove A) : a ∈ upperBounds A → sSup A ≤ a  := by
   intro ha
@@ -100,6 +99,17 @@ def Sℚ (R : Type) [RealField R] : R → (Set ℚ) := fun x => {(q:ℚ ) | ↑ 
 def Sℚ' (R : Type) [RealField R] : R → (Set ℚ) := fun x => {(q : ℚ )| 0 < q ∧ q ∈ Sℚ R x}
 
 def SR (R : Type) [RealField R] : R → (Set R) := fun x => {(q : R) | q ∈ Sℚ R x}
+
+def SRZ (R Z : Type) [RealField R] [RealField Z] :
+  R → Z := fun x => sSup {(q : Z) | q ∈ Sℚ R x}
+
+def Supx (R : Type) [RealField R] : R → R := fun x => sSup (SR R x)
+
+def addset {R : Type} [Ring R] :
+  (Set R) → (Set R) → (Set R) := fun  U V => {(x : R) | ∃ u ∈ U, ∃ v ∈ V, x = u + v }
+
+def mulset {R : Type} [Ring R] :
+  (Set R) → (Set R) → (Set R) := fun  U V => {(x : R) | ∃ u ∈ U, ∃ v ∈ V, x = u * v }
 
 lemma forall_x_SℚRx_nonempty (R : Type) [RealField R] (x : R) : (Sℚ R x).Nonempty:= by
 
@@ -236,7 +246,7 @@ theorem x_eq_y_iff_Sℚ'Rx_eq_Sℚ'Ry
     rw[heq]
   · have hinj := Sℚ_inj R
     intro eqq
-    apply Sℚ'_then_Sℚ hx hy at eqq
+    apply Sℚ'_then_Sℚ x y hx hy at eqq
     apply Sℚ_inj R at eqq
     exact eqq
 --se puede modificar esto y aplicar que Sℚ R x es no vacío, sacando un testigo etc
@@ -263,8 +273,6 @@ lemma forall_x_SRRx_bddabv (R : Type) [RealField R] (x : R) : BddAbove (SR R x) 
   obtain ⟨q,hq,ha⟩:= h
   rw[Sℚ] at hq; simp at hq
   linarith
-
-def Supx (R : Type) [RealField R] : R → R := fun x => sSup (SR R x)
 -- tutoría, igual a demostrar que SRZ R R es la identidad, podría reescribirlo... (debería)
 lemma Supx_is_idd (R : Type) [RealField R] :  Supx R = id := by
   funext x
@@ -296,9 +304,6 @@ lemma Supx_is_idd2 (R : Type) [RealField R] :∀(x:R),  Supx R x = x := by
   have idd:= Supx_is_idd R
   rw[idd]
   rfl
-
-def SRZ (R Z : Type) [RealField R] [RealField Z] :
-  R → Z := fun x => sSup {(q : Z) | q ∈ Sℚ R x}
 
 theorem rat_btw_p_lt_x_lt_q (R : Type) [RealField R] (x : R) (p q : ℚ) :
   ↑ p < x → x < ↑ q → p < q := by
@@ -536,9 +541,6 @@ theorem SRZ_is_bijective (R Z : Type) [RealField R] [RealField Z] :
     specialize this Z R z
     exact this
 
-def addset {R : Type} [Ring R] :
-  (Set R) → (Set R) → (Set R) := fun  U V => {(x : R) | ∃ u ∈ U, ∃ v ∈ V, x = u + v }
-
 lemma Sℚ_x_addset_Sℚ_y_eq_Sℚ_x_add_y {R : Type} [RealField R] (x : R) (y : R) :
   addset (Sℚ R x) (Sℚ R y) = Sℚ R (x + y) := by
   rw[addset,Sℚ,Sℚ,Sℚ]
@@ -673,9 +675,6 @@ theorem Sℚ'Rx_eq_Sℚ'ZSRZRZx (R Z : Type) [RealField R] [RealField Z] (x : R)
     · exact ha.left
     · rw[<- SℚRx_eq_SℚZSRZRZx] at ha
       exact ha.right
-
-def mulset {R : Type} [Ring R] :
-  (Set R) → (Set R) → (Set R) := fun  U V => {(x : R) | ∃ u ∈ U, ∃ v ∈ V, x = u * v }
 
 lemma Sℚ'_preserves_mulset {R : Type} [RealField R] {x : R} {y : R} :
  (0 < x) → ( 0 < y) → mulset (Sℚ' R x) (Sℚ' R y) = Sℚ' R (x*y) := by
@@ -1068,6 +1067,36 @@ theorem SRZ_preserves_mul (R Z : Type)
         exact lt_of_le_of_ne' hylt hyeq
       exact SRZ_preserves_mul_x_y_pos R Z x y hxgt hygt
 
+theorem a2_eq_a_a_neq_0_a_eq_one
+  (R : Type) [RealField R] (x : R) : (x ≠ 0)∧ x*x = x ↔  x = 1 := by
+  constructor
+  · intro h
+    obtain ⟨h0, h1⟩ := h
+    field_simp at h1
+    exact h1
+  · intro h1
+    constructor
+    · linarith
+    · rw[h1]; simp
+
+lemma one_to_one (R Z : Type) [RealField R] [RealField Z] : SRZ R Z 1 = 1:= by
+    have one_eq : (1 : R) = 1*1 := by linarith
+    have srz_eq1 : SRZ R Z 1 =  SRZ R Z (1*1) := by nth_rewrite 1 [one_eq]; rfl
+    have srz_eq2 : SRZ R Z 1 = SRZ R Z 1 * SRZ R Z 1  := by
+      rw[ SRZ_preserves_mul R Z 1 1] at srz_eq1
+      exact srz_eq1
+    have neq_0 : SRZ R Z 1 ≠ 0
+    · by_contra hc
+      have cero_eq_SRZ0:= zero_to_zero R Z
+      rw[<- cero_eq_SRZ0] at hc
+      apply (SRZ_is_bijective R Z).left at hc
+      linarith
+    obtain ⟨aux, eq⟩:= a2_eq_a_a_neq_0_a_eq_one Z (SRZ R Z 1)
+    apply aux
+    constructor
+    · exact neq_0
+    · symm; exact srz_eq2
+
 --teorema a demostrar
 theorem Uniqueness_Real_Numbers (X Y : Type) [RealField X] [RealField Y] :
   ∃ f : X → Y,
@@ -1079,5 +1108,6 @@ theorem Uniqueness_Real_Numbers (X Y : Type) [RealField X] [RealField Y] :
   use SRZ X Y
   constructor
   · exact  SRZ_is_bijective X Y
+
 
   sorry
