@@ -934,6 +934,18 @@ lemma supZ_SℚRx_gt_0_eq_SRZRZx_x_gt_0
   have ISLUB0sSup := sSup_axiom {y : Z| ∃ q ∈ Sℚ R x, y = ↑q ∧ 0 < q} nonem2 bdd
   exact IsLUB.unique ISLUB0sSup ISLUB0srz
 
+lemma SRZminusx_eq_minusSRZx {R Z : Type} [RealField R]
+    [RealField Z] {x : R} : SRZ R Z (-x) = - (SRZ R Z x):= by
+  have zero_to_zero := zero_to_zero R Z
+  have cero_eq_cero1 : (0 : R)= x - x := by linarith
+  have cero_eq_cero2 : (0 : Z) = SRZ R Z x - SRZ R Z x:= by linarith
+  rw[cero_eq_cero1] at zero_to_zero
+  have aux : x - x = x + (-x) := by linarith
+  rw[aux] at zero_to_zero
+  rw[SRZ_preserves_add R Z x (-x)] at zero_to_zero
+  rw[cero_eq_cero2] at zero_to_zero
+  linarith
+
 lemma SRZ_preserves_mul_x_y_pos (R Z : Type) [RealField R] [RealField Z] (x y : R) :(0<x) → (0<y) →
   SRZ R Z (x * y) = SRZ R Z x * SRZ R Z y := by
   intro hx hy
@@ -957,30 +969,34 @@ lemma SRZ_preserves_mul_x_y_pos (R Z : Type) [RealField R] [RealField Z] (x y : 
   have Sℚ'Rx_eq_Sℚ'ZSRZRZx_1 := Sℚ'Rx_eq_Sℚ'ZSRZRZx R Z (x*y) mul_gt_0
   have Sℚ'Rx_eq_Sℚ'ZSRZRZx_2 := Sℚ'Rx_eq_Sℚ'ZSRZRZx  R Z x hx
   have Sℚ'Rx_eq_Sℚ'ZSRZRZx_3 := Sℚ'Rx_eq_Sℚ'ZSRZRZx  R Z y hy
-
+  have cero_lt_sup1 : 0 < sSup {y : Z| ∃ q ∈ Sℚ' R x, y = ↑q}:= by
+    rw[supZ_SℚRx_gt_0_eq_SRZRZx_x_gt_0]; exact cero_lt_SRZx; exact hx
+  have cero_lt_sup2 : 0 < sSup {z : Z| ∃ q ∈ Sℚ' R y, z = ↑q}:= by
+    rw[supZ_SℚRx_gt_0_eq_SRZRZx_x_gt_0]; exact cero_lt_SRZy; exact hy
+  have preserved1:= Sℚ'_preserves_mulset hx hy
+  have preserved2:= Sℚ'_preserves_mulset cero_lt_sup1 cero_lt_sup2
   rw[<-Sℚ'Rx_eq_Sℚ'ZSRZRZx_1 ]
   rw[<- supZ_SℚRx_gt_0_eq_SRZRZx_x_gt_0 R Z, <- supZ_SℚRx_gt_0_eq_SRZRZx_x_gt_0 R Z]
-  rw[<- Sℚ'_preserves_mulset hx,<- Sℚ'_preserves_mulset]
-
-  rw[supZ_SℚRx_gt_0_eq_SRZRZx_x_gt_0, supZ_SℚRx_gt_0_eq_SRZRZx_x_gt_0]
+  rw[<- preserved1 ,<- preserved2]
+  rw[supZ_SℚRx_gt_0_eq_SRZRZx_x_gt_0 , supZ_SℚRx_gt_0_eq_SRZRZx_x_gt_0]
   rw[Sℚ'Rx_eq_Sℚ'ZSRZRZx_2, Sℚ'Rx_eq_Sℚ'ZSRZRZx_3]
 
-  exact hy
-  exact hx
-  rw[supZ_SℚRx_gt_0_eq_SRZRZx_x_gt_0]; exact cero_lt_SRZx; exact hx
-  rw[supZ_SℚRx_gt_0_eq_SRZRZx_x_gt_0]; exact cero_lt_SRZy; exact hy; exact hy
-  exact hy; exact hx
+  · exact hy
+  · exact hx
+  · exact hy
+  · exact hx
 
+lemma SRZ_preserves_mul_x_y_neg (R Z : Type) [RealField R] [RealField Z] (x y : R) :(x<0) → (y<0) →
+  SRZ R Z (x * y) = SRZ R Z x * SRZ R Z y := by
 
+  intro hx hy
+  have mx_pos  : 0 < -x := by linarith
+  have my_pos  : 0 < -y := by linarith
+  have prod_pos: x*y = (-x)*(-y) := by field_simp
+  have mSRZmx_eq_SRZx : -SRZ R Z (-x) = SRZ R Z x
+  · rw[SRZminusx_eq_minusSRZx]; simp
 
-
-
-
-
-
-
-
-
+  rw[prod_pos]
 
 
 --teorema a demostrar
