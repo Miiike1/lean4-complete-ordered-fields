@@ -782,7 +782,6 @@ lemma supZ_Qlower_gt0Rx_eq_φRZx
     rw[ℚlower]
     simp
     exact hq2
-
   have nonem2: {y : Z | ∃ q ∈ ℚlower R x, y = ↑q ∧ 0 < q}.Nonempty
   · use q
     simp
@@ -835,7 +834,7 @@ lemma supZ_Qlower_gt0Rx_eq_φRZx
       · exact hq1
       · symm
         exact hq2
-  have inn: {y : Z | ∃ q ∈ ℚlower R x, y = ↑q ∧ 0 < q}  ⊆   {y : Z | ∃ q ∈ ℚlower R x, y = ↑q } := by
+  have inn: {y : Z | ∃ q ∈ ℚlower R x, y = ↑q ∧ 0 < q} ⊆ {y : Z | ∃ q ∈ ℚlower R x, y = ↑q } := by
     intro a ha
     obtain ⟨b, ha1, ha2, ha3⟩ := ha
     simp
@@ -1069,7 +1068,7 @@ theorem Real_fields_are_isomorphic (X Y : Type) [RealField X] [RealField Y] :
     (∀ x y, f (x + y) = f x + f y) ∧
     (∀ x y, f (x * y) = f x * f y) ∧
     (∀ x y, x < y ↔ f x < f y)
-    ∧ ((f 0 =0 ) ∧ (f 1 = 1)) := by
+    ∧ ((f 0 =0 ) ∧  (f 1 = 1)) := by
 
   use φ X Y
   constructor
