@@ -1,13 +1,37 @@
-# proyecto
+Formalization of the Uniqueness of Complete Ordered Fields in Lean 4
 
-## GitHub configuration
+This repository contains the code developed for my Bachelor's Thesis in Mathematics.
 
-To set up your new GitHub repository, follow these steps:
+The project serves as an introduction to the formal foundations of Lean 4, a theorem prover and programming language designed for the formal verification of mathematical results. The thesis has three main objectives:
 
-* Under your repository name, click **Settings**.
-* In the **Actions** section of the sidebar, click "General".
-* Check the box **Allow GitHub Actions to create and approve pull requests**.
-* Click the **Pages** section of the settings sidebar.
-* In the **Source** dropdown menu, select "GitHub Actions".
+Introduce the logical and formal framework underlying Lean 4.
+Provide a practical guide to its basic usage and proof development workflow.
+Present a complete case study in formalized mathematics.
+Main Result
 
-After following the steps above, you can remove this section from the README file.
+As a practical application, the repository includes a formal proof of the following classical theorem:
+
+Any two complete ordered fields satisfying the least upper bound property are isomorphic.
+
+The formalization follows the standard mathematical construction of the unique field isomorphism between complete ordered fields and verifies every step within Lean 4.
+
+Contents:
+Introduction to the foundations of Lean 4.
+Basic examples and proof techniques.
+Guide to theorem declaration and proof construction.
+Formalization of ordered fields and completeness.
+Proof of the uniqueness (up to isomorphism) of complete ordered fields.
+
+Requirements
+Lean 4
+Mathlib
+
+References
+The development relies heavily on the Lean 4 ecosystem and the Mathlib mathematical library.
+
+Author
+Miguel Laborda Velázquez. 
+Supervisor: 
+Miguel Ángel Marco Buzunáriz
+Bachelor's Thesis in Mathematics
+University of Zaragoza
