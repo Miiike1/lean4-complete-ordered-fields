@@ -40,7 +40,7 @@ The core mathematical development can be found in:
 * **File:** [`Isomorphism_btw_realfields.lean`](https://github.com/Miiike1/proyecto/blob/master/Isomorphism_btw_two_RealFields/Isomorphism_btw_realfields.lean)
 
 ### 📄 Thesis Document
-* The complete Bachelor's thesis can be read (in Spanish) in the file: [`Formalización_de_teoremas_A(1).pdf`](Formalización_de_teoremas_A\(1\).pdf)
+* The complete Bachelor's thesis can be read (in Spanish) in the file: [`Formalización_de_teoremas_A(1).pdf`](https://github.com/Miiike1/proyecto/blob/master/Formalizaci%C3%B3n_de_teoremas_A%20(1).pdf)
 
 ---
 
