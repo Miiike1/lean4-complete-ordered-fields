@@ -44,13 +44,6 @@ The core mathematical development can be found in:
 
 ---
 
-## ⚙️ Requirements
-
-To run and interact with the proofs in this repository, you need to have the following dependencies installed:
-
-* **Lean 4** (via `elan`)
-* **Mathlib** (Lean's mathematical library)
-
 > 📚 **References:** The development relies heavily on the Lean 4 ecosystem and the [Mathlib](https://github.com/leanprover-community/mathlib4) library.
 
 ---
