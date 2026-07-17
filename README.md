@@ -37,7 +37,7 @@ The formalization rigorously follows the standard mathematical construction of t
 ---
 ## Mathematical Perspective
 
-*Starting from the algebraic structure of a field and adding the least upper bound property, the project studies the uniqueness of complete ordered fields up to isomorphism 
+* Starting from the algebraic structure of a field and adding the least upper bound property, the project studies the uniqueness of complete ordered fields up to isomorphism 
 by the construction of the isomorphism between two objects with the named properties using the rational numbers as the bridge between them.
 ---
 
