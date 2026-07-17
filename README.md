@@ -34,6 +34,12 @@ The formalization rigorously follows the standard mathematical construction of t
 * **Formalization Core:**
   * Formalization of ordered fields and completeness.
   * Complete proof of the uniqueness (up to isomorphism) of complete ordered fields.
+---
+## Mathematical Perspective
+
+Starting from the algebraic structure of a field and adding the least upper bound property, the project studies the uniqueness of complete ordered fields up to isomorphism 
+by the construction of the isomorphism between two objects with the named properties using the rational numbers as the bridge between them.
+---
 
 ### 💻 Source Code
 The core mathematical development can be found in:
@@ -45,9 +51,10 @@ The core mathematical development can be found in:
 ---
 ## Design
 
-The formalization intentionally avoids using the existing proof of this result available in Mathlib in order to develop an independent version of the argument.
+* The formalization intentionally avoids using the existing proof of this result available in Mathlib in order to develop an independent version of the argument.
 The `Field` class from Mathlib was extended to define a new `RealField` structure by adding the least upper bound property as a new axiom.
 The main external result used from Mathlib is the density of the rational numbers in an Archimedean ordered field, which becomes available after establishing an Archimedean instance for the formalized structure. Most intermediate results required for the proof are developed within this project.
+
 ---
 > 📚 **References:** The development relies heavily on the Lean 4 ecosystem and the [Mathlib](https://github.com/leanprover-community/mathlib4) library.
 
