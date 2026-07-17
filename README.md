@@ -10,7 +10,7 @@ The project serves as an introduction to the formal foundations of **Lean 4**, a
 
 The thesis and this repository focus on three main goals:
 1. **Framework Introduction:** Introduce the logical and formal foundations underlying Lean 4.
-2. **Practical Guide:** Provide a hands-on guide to its basic usage and proof development workflow.
+2. **Practical Guide:** Provide a basic introduction to the basic use of Lean4.
 3. **Case Study:** Present a complete, verified case study in formalized mathematics.
 
 ---
