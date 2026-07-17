@@ -43,10 +43,17 @@ The core mathematical development can be found in:
 * The complete Bachelor's thesis can be read (in Spanish) in the file: [`Formalización_de_teoremas_A(1).pdf`](https://github.com/Miiike1/proyecto/blob/master/Formalizaci%C3%B3n_de_teoremas_A%20(1).pdf)
 
 ---
+## Design
 
+The formalization intentionally avoids using the existing proof of this result available in Mathlib in order to develop an independent version of the argument.
+The `Field` class from Mathlib was extended to define a new `RealField` structure by adding the least upper bound property as a new axiom.
+The main external result used from Mathlib is the density of the rational numbers in an Archimedean ordered field, which becomes available after establishing an Archimedean instance for the formalized structure. Most intermediate results required for the proof are developed within this project.
+---
 > 📚 **References:** The development relies heavily on the Lean 4 ecosystem and the [Mathlib](https://github.com/leanprover-community/mathlib4) library.
 
 ---
+
+
 
 ## ✍️ Authorship
 
